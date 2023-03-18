@@ -459,7 +459,7 @@ int main()
 
     bool is_game_over = false;
 
-    int who_win;
+    int who_win; 
 
     string won_player;
 
