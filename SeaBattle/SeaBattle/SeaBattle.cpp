@@ -3,7 +3,7 @@
 
 using namespace std;
 
-const int size = 10;
+const int SIZE = 10;
 
 const string dir[] = { "up","down","left","right" };
 
@@ -54,13 +54,13 @@ bool gameOver(char** player1, char** player2)
 
     bool somebody_lose = false;
 
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             if (player1[i][j] == 'S')
                 lose_player1 = false;
 
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             if (player2[i][j] == 'S')
                 lose_player2 = false;
 
@@ -74,8 +74,8 @@ bool is_player1_win(char** player1, char** player2)
 {
     bool player1_win = false;
 
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             if (player1[i][j] == 'S')
                 player1_win = true;
 
@@ -116,23 +116,23 @@ void printBoard(char** player)
 
     cout << "    ";
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < SIZE; i++)
         cout << coordinateX[i] << "  ";
 
     cout << endl;
 
-    for (int i = 0; i < size - 1; i++)
+    for (int i = 0; i < SIZE - 1; i++)
     {
         cout << " " << coordinateX[i] << "  ";
-        for (int j = 0; j < size; j++)
+        for (int j = 0; j < SIZE; j++)
             cout << player[i][j] << "  ";
         cout << endl;
     }
 
-    for (int i = size - 1; i < size; i++)
+    for (int i = SIZE - 1; i < SIZE; i++)
     {
         cout << coordinateX[i] << "  ";
-        for (int j = 0; j < size; j++)
+        for (int j = 0; j < SIZE; j++)
             cout << player[i][j] << "  ";
         cout << endl;
     }
@@ -221,9 +221,9 @@ bool errorOneDeskShip(int X, int Y, char** player, int ship_s)
         {
             ship_s--;
         }
-        for (int i = Y == 1 ? Y - 1 : Y - 2; i < size && i < Y + 1; i++)
+        for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZE && i < Y + 1; i++)
         {
-            for (int j = X == 1 ? X - 1 : X - 2, stepsJ = 0; j < size && stepsJ < ship_s + 2; j++, stepsJ++)
+            for (int j = X == 1 ? X - 1 : X - 2, stepsJ = 0; j < SIZE && stepsJ < ship_s + 2; j++, stepsJ++)
             {
                 if (player[i][j] == 'S')
                 {
@@ -254,9 +254,9 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
                 {
                     ship_s--;
                 }
-                for (int i = Y == 1 ? Y - 1 : Y - 2; i < size && i < Y + 1; i++)
+                for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZE && i < Y + 1; i++)
                 {
-                    for (int j = X == 1 ? X - 1 : X - 2, stepsJ = 0; j < size && stepsJ < ship_s + 2; j++, stepsJ++)
+                    for (int j = X == 1 ? X - 1 : X - 2, stepsJ = 0; j < SIZE && stepsJ < ship_s + 2; j++, stepsJ++)
                     {
                         if (player[i][j] == 'S')
                         {
@@ -271,7 +271,7 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
                 {
                     ship_s--;
                 }
-                for (int i = Y == 1 ? Y - 1 : Y - 2; i < size && i < Y + 1; i++)
+                for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZE && i < Y + 1; i++)
                 {
                     for (int j = X == 10 ? X - 1 : X, stepsJ = 0; j > 0 && stepsJ < ship_s + 2; j--, stepsJ++)
                     {
@@ -291,7 +291,7 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
                 {
                     ship_s--;
                 }
-                for (int j = X == 1 ? X - 1 : X - 2; j < size && j < X + 1; j++)
+                for (int j = X == 1 ? X - 1 : X - 2; j < SIZE && j < X + 1; j++)
                 {
                     for (int i = Y == 10 ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
                     {
@@ -308,9 +308,9 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
                 {
                     ship_s--;
                 }
-                for (int j = X == 1 ? X - 1 : X - 2; j < size && j < X + 1; j++)
+                for (int j = X == 1 ? X - 1 : X - 2; j < SIZE && j < X + 1; j++)
                 {
-                    for (int i = Y == 1 ? Y - 1 : Y - 2, stepsI = 0; i < size && stepsI < ship_s + 2; i++, stepsI++)
+                    for (int i = Y == 1 ? Y - 1 : Y - 2, stepsI = 0; i < SIZE && stepsI < ship_s + 2; i++, stepsI++)
                     {
                         if (player[i][j] == 'S')
                         {
@@ -333,20 +333,20 @@ char** createPlayer1()
 {
     char** pl1 = 0;
 
-    pl1 = new char* [size];
+    pl1 = new char* [SIZE];
 
-    for (int h = 0; h < size; h++)
+    for (int h = 0; h < SIZE; h++)
     {
-        pl1[h] = new char[size];
+        pl1[h] = new char[SIZE];
 
-        for (int w = 0; w < size; w++)
+        for (int w = 0; w < SIZE; w++)
         {
             pl1[h][w] = 0;
         }
     }
 
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             pl1[i][j] = '-';
 
     return pl1;
@@ -356,20 +356,20 @@ char** createPlayer2()
 {
     char** pl2 = 0;
 
-    pl2 = new char* [size];
+    pl2 = new char* [SIZE];
 
-    for (int h = 0; h < size; h++)
+    for (int h = 0; h < SIZE; h++)
     {
-        pl2[h] = new char[size];
+        pl2[h] = new char[SIZE];
 
-        for (int w = 0; w < size; w++)
+        for (int w = 0; w < SIZE; w++)
         {
             pl2[h][w] = 0;
         }
     }
 
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             pl2[i][j] = '-';
 
     return pl2;
@@ -379,20 +379,20 @@ char** createPlayer1Hide()
 {
     char** pl1 = 0;
 
-    pl1 = new char* [size];
+    pl1 = new char* [SIZE];
 
-    for (int h = 0; h < size; h++)
+    for (int h = 0; h < SIZE; h++)
     {
-        pl1[h] = new char[size];
+        pl1[h] = new char[SIZE];
 
-        for (int w = 0; w < size; w++)
+        for (int w = 0; w < SIZE; w++)
         {
             pl1[h][w] = 0;
         }
     }
 
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             pl1[i][j] = '-';
 
     return pl1;
@@ -402,20 +402,20 @@ char** createPlayer2Hide()
 {
     char** pl2 = 0;
 
-    pl2 = new char* [size];
+    pl2 = new char* [SIZE];
 
-    for (int h = 0; h < size; h++)
+    for (int h = 0; h < SIZE; h++)
     {
-        pl2[h] = new char[size];
+        pl2[h] = new char[SIZE];
 
-        for (int w = 0; w < size; w++)
+        for (int w = 0; w < SIZE; w++)
         {
             pl2[h][w] = 0;
         }
     }
 
-    for (int i = 0; i < size; i++)
-        for (int j = 0; j < size; j++)
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             pl2[i][j] = '-';
 
     return pl2;
@@ -423,28 +423,28 @@ char** createPlayer2Hide()
 
 void DeleteBoards(char** player1, char** player2, char** player1Hide, char** player2Hide)
 {
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < SIZE; i++)
     {
         delete[] player1[i];
     }
 
     delete[] player1;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < SIZE; i++)
     {
         delete[] player2[i];
     }
 
     delete[] player2;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < SIZE; i++)
     {
         delete[] player1Hide[i];
     }
 
     delete[] player1Hide;
 
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < SIZE; i++)
     {
         delete[] player2Hide[i];
     }
@@ -467,7 +467,7 @@ int main()
 
     int Y;
 
-    int ship_size = 5;
+    int ship_SIZE = 5;
 
     string direction;
 
@@ -495,7 +495,7 @@ int main()
 
         cin >> direction;
 
-        if (!(error(X, Y, direction, player1, ship_size)))
+        if (!(error(X, Y, direction, player1, ship_SIZE)))
         {
             if (direction == "left" || direction == "right")
             {
@@ -550,7 +550,7 @@ int main()
 
     ClearScreen();
 
-    ship_size = 3;
+    ship_SIZE = 3;
 
     for (int i = 0; i < 2; i++)
     {
@@ -570,7 +570,7 @@ int main()
 
             cin >> direction;
 
-            if (!(error(X, Y, direction, player1, ship_size)))
+            if (!(error(X, Y, direction, player1, ship_SIZE)))
             {
                 if (direction == "left" || direction == "right")
                 {
@@ -627,7 +627,7 @@ int main()
         ClearScreen();
     }
 
-    ship_size = 2;
+    ship_SIZE = 2;
 
     for (int i = 0; i < 3; i++)
     {
@@ -647,7 +647,7 @@ int main()
 
             cin >> direction;
 
-            if (!(error(X, Y, direction, player1, ship_size)))
+            if (!(error(X, Y, direction, player1, ship_SIZE)))
             {
                 if (direction == "left" || direction == "right")
                 {
@@ -704,7 +704,7 @@ int main()
         ClearScreen();
     }
 
-    ship_size = 1;
+    ship_SIZE = 1;
 
     for (int i = 0; i < 4; i++)
     {
@@ -720,7 +720,7 @@ int main()
 
             cin >> X;
 
-            if (!(error(X, Y, direction, player1, ship_size)))
+            if (!(error(X, Y, direction, player1, ship_SIZE)))
             {
                 if ((X <= 10 && X >= 0) && (Y <= 10 && Y >= 0))
                     break;
@@ -738,7 +738,7 @@ int main()
         ClearScreen();
     }
 
-    ship_size = 5;
+    ship_SIZE = 5;
 
     printBoard(player2);
 
@@ -756,7 +756,7 @@ int main()
 
         cin >> direction;
 
-        if (!(error(X, Y, direction, player2, ship_size)))
+        if (!(error(X, Y, direction, player2, ship_SIZE)))
         {
             if (direction == "left" || direction == "right")
             {
@@ -811,7 +811,7 @@ int main()
 
     ClearScreen();
 
-    ship_size = 3;
+    ship_SIZE = 3;
 
     for (int i = 0; i < 2; i++)
     {
@@ -831,7 +831,7 @@ int main()
 
             cin >> direction;
 
-            if (!(error(X, Y, direction, player2, ship_size)))
+            if (!(error(X, Y, direction, player2, ship_SIZE)))
             {
                 if (direction == "left" || direction == "right")
                 {
@@ -887,7 +887,7 @@ int main()
         ClearScreen();
     }
 
-    ship_size = 2;
+    ship_SIZE = 2;
 
     for (int i = 0; i < 3; i++)
     {
@@ -907,7 +907,7 @@ int main()
 
             cin >> direction;
 
-            if (!(error(X, Y, direction, player2, ship_size)))
+            if (!(error(X, Y, direction, player2, ship_SIZE)))
             {
                 if (direction == "left" || direction == "right")
                 {
@@ -964,7 +964,7 @@ int main()
         ClearScreen();
     }
 
-    ship_size = 1;
+    ship_SIZE = 1;
 
 
     for (int i = 0; i < 4; i++)
@@ -981,7 +981,7 @@ int main()
 
             cin >> X;
 
-            if (!(errorOneDeskShip(X, Y, player2, ship_size)))
+            if (!(errorOneDeskShip(X, Y, player2, ship_SIZE)))
             {
                 break;
             }
