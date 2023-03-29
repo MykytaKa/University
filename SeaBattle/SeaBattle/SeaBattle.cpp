@@ -3,79 +3,34 @@
 
 using namespace std;
 
-const int SIZE = 10;
+const int SIZEBOARD = 10;
 
-const string dir[] = { "up","down","left","right" };
-
-const int coordinateX[] = { 1,2,3,4,5,6,7,8,9,10 };
-
-void ClearScreen()
+bool playerLose(char** player)
 {
-    HANDLE                     hStdOut;
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    DWORD                      count;
-    DWORD                      cellCount;
-    COORD                      homeCoords = { 0, 0 };
+    bool losePlayer = true;
 
-    hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (hStdOut == INVALID_HANDLE_VALUE) return;
+    for (int i = 0; i < SIZEBOARD; i++)
+        for (int j = 0; j < SIZEBOARD; j++)
+            if (player[i][j] == 'S')
+                losePlayer = false;
 
-    /* Get the number of cells in the current buffer */
-    if (!GetConsoleScreenBufferInfo(hStdOut, &csbi)) return;
-    cellCount = csbi.dwSize.X * csbi.dwSize.Y;
-
-    /* Fill the entire buffer with spaces */
-    if (!FillConsoleOutputCharacter(
-        hStdOut,
-        (TCHAR)' ',
-        cellCount,
-        homeCoords,
-        &count
-    )) return;
-
-    /* Fill the entire buffer with the current colors and attributes */
-    if (!FillConsoleOutputAttribute(
-        hStdOut,
-        csbi.wAttributes,
-        cellCount,
-        homeCoords,
-        &count
-    )) return;
-
-    /* Move the cursor home */
-    SetConsoleCursorPosition(hStdOut, homeCoords);
+    return losePlayer;
 }
 
 bool gameOver(char** player1, char** player2)
 {
-    bool lose_player1 = true;
+    bool lose_player1 = playerLose(player1);
+    bool lose_player2 = playerLose(player2);    
 
-    bool lose_player2 = true;
-
-    bool somebody_lose = false;
-
-    for (int i = 0; i < SIZE; i++)
-        for (int j = 0; j < SIZE; j++)
-            if (player1[i][j] == 'S')
-                lose_player1 = false;
-
-    for (int i = 0; i < SIZE; i++)
-        for (int j = 0; j < SIZE; j++)
-            if (player2[i][j] == 'S')
-                lose_player2 = false;
-
-    if (lose_player1 || lose_player2)
-        somebody_lose = true;
-
-    return somebody_lose;
+    return lose_player1 || lose_player2;
 }
 
-bool is_player1_win(char** player1, char** player2)
+bool is_player1_win(char** player1)
 {
     bool player1_win = false;
 
-    for (int i = 0; i < SIZE; i++)
-        for (int j = 0; j < SIZE; j++)
+    for (int i = 0; i < SIZEBOARD; i++)
+        for (int j = 0; j < SIZEBOARD; j++)
             if (player1[i][j] == 'S')
                 player1_win = true;
 
@@ -85,13 +40,9 @@ bool is_player1_win(char** player1, char** player2)
 char** shotBoard(int Xshot, int Yshot, char** boardDefendPlayer, char** defendPlayer)
 {
     if (defendPlayer[Yshot - 1][Xshot - 1] == 'S')
-    {
         boardDefendPlayer[Yshot - 1][Xshot - 1] = 'X';
-    }
     else
-    {
         boardDefendPlayer[Yshot - 1][Xshot - 1] = 'O';
-    }
 
     return boardDefendPlayer;
 }
@@ -99,50 +50,44 @@ char** shotBoard(int Xshot, int Yshot, char** boardDefendPlayer, char** defendPl
 char** shotPlayer(int Xshot, int Yshot, char** defendPlayer)
 {
     if (defendPlayer[Yshot - 1][Xshot - 1] == 'S')
-    {
         defendPlayer[Yshot - 1][Xshot - 1] = 'X';
-    }
     else
-    {
         defendPlayer[Yshot - 1][Xshot - 1] = 'O';
-    }
 
     return defendPlayer;
 }
 
 void printBoard(char** player)
 {
-    cout << "Your board" << endl << endl;
+    cout << "Your board" << endl << endl << "    ";
 
-    cout << "    ";
-
-    for (int i = 0; i < SIZE; i++)
-        cout << coordinateX[i] << "  ";
+    for (int i = 0; i < SIZEBOARD; i++)
+        cout << i + 1 << "  ";
 
     cout << endl;
 
-    for (int i = 0; i < SIZE - 1; i++)
+    for (int i = 0; i < SIZEBOARD - 1; i++)
     {
-        cout << " " << coordinateX[i] << "  ";
-        for (int j = 0; j < SIZE; j++)
+        cout << " " << i + 1 << "  ";
+        for (int j = 0; j < SIZEBOARD; j++)
             cout << player[i][j] << "  ";
         cout << endl;
     }
 
-    for (int i = SIZE - 1; i < SIZE; i++)
+    for (int i = SIZEBOARD - 1; i < SIZEBOARD; i++)
     {
-        cout << coordinateX[i] << "  ";
-        for (int j = 0; j < SIZE; j++)
+        cout << i + 1 << "  ";
+        for (int j = 0; j < SIZEBOARD; j++)
             cout << player[i][j] << "  ";
         cout << endl;
     }
 }
 
-char** five_deck_ship(int X5, int Y5, string direction5, char** player)
+char** placeShip(int X5, int Y5, string direction5, char** player, int shipSize)
 {
     if (direction5 == "left" || direction5 == "right")
     {
-        for (int i = Y5 - 1, j = X5 - 1, magnifier = direction5 == "right" ? magnifier = 1 : magnifier = -1, steps = 0; steps < 5; j += magnifier)
+        for (int i = Y5 - 1, j = X5 - 1, magnifier = direction5 == "right" ? magnifier = 1 : magnifier = -1, steps = 0; steps < shipSize; j += magnifier)
         {
             player[i][j] = 'S';
             steps++;
@@ -150,7 +95,7 @@ char** five_deck_ship(int X5, int Y5, string direction5, char** player)
     }
     else
     {
-        for (int i = Y5 - 1, j = X5 - 1, magnifier = direction5 == "up" ? magnifier = -1 : magnifier = 1, steps = 0; steps < 5; i += magnifier)
+        for (int i = Y5 - 1, j = X5 - 1, magnifier = direction5 == "up" ? magnifier = -1 : magnifier = 1, steps = 0; steps < shipSize; i += magnifier)
         {
             player[i][j] = 'S';
             steps++;
@@ -158,86 +103,6 @@ char** five_deck_ship(int X5, int Y5, string direction5, char** player)
     }
 
     return player;
-}
-
-char** three_deck_ship(int X3, int Y3, string direction3, char** player)
-{
-    if (direction3 == "left" || direction3 == "right")
-    {
-        for (int i = Y3 - 1, j = X3 - 1, magnifier = direction3 == "right" ? magnifier = 1 : magnifier = -1, steps = 0; steps < 3; j += magnifier)
-        {
-            player[i][j] = 'S';
-            steps++;
-        }
-    }
-    else
-    {
-        for (int i = Y3 - 1, j = X3 - 1, magnifier = direction3 == "up" ? magnifier = -1 : magnifier = 1, steps = 0; steps < 3; i += magnifier)
-        {
-            player[i][j] = 'S';
-            steps++;
-        }
-    }
-
-    return player;
-}
-
-char** two_deck_ship(int X2, int Y2, string direction2, char** player)
-{
-    if (direction2 == "left" || direction2 == "right")
-    {
-        for (int i = Y2 - 1, j = X2 - 1, magnifier = direction2 == "right" ? magnifier = 1 : magnifier = -1, steps = 0; steps < 2; j += magnifier)
-        {
-            player[i][j] = 'S';
-            steps++;
-        }
-    }
-    else
-    {
-        for (int i = Y2 - 1, j = X2 - 1, magnifier = direction2 == "up" ? magnifier = -1 : magnifier = 1, steps = 0; steps < 2; i += magnifier)
-        {
-            player[i][j] = 'S';
-            steps++;
-        }
-    }
-
-    return player;
-}
-
-char** one_deck_ship(int X1, int Y1, char** player)
-{
-    player[Y1 - 1][X1 - 1] = 'S';
-
-    return player;
-}
-
-bool errorOneDeskShip(int X, int Y, char** player, int ship_s)
-{
-    bool is_error = false;
-
-    if ((X <= 10 && X >= 0) && (Y <= 10 && Y >= 0))
-    {
-        if (X == 1)
-        {
-            ship_s--;
-        }
-        for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZE && i < Y + 1; i++)
-        {
-            for (int j = X == 1 ? X - 1 : X - 2, stepsJ = 0; j < SIZE && stepsJ < ship_s + 2; j++, stepsJ++)
-            {
-                if (player[i][j] == 'S')
-                {
-                    is_error = true;
-                }
-            }
-        }
-    }
-    else
-    {
-        is_error = true;
-    }
-
-    return is_error;
 }
 
 bool error(int X, int Y, string direction, char** player, int ship_s)
@@ -250,13 +115,15 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
         {
             if (direction == "right")
             {
+                if (X + ship_s - 1 > 10)
+                    is_error = true;
                 if (X == 1)
                 {
                     ship_s--;
                 }
-                for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZE && i < Y + 1; i++)
+                for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZEBOARD && i < Y + 1; i++)
                 {
-                    for (int j = X == 1 ? X - 1 : X - 2, stepsJ = 0; j < SIZE && stepsJ < ship_s + 2; j++, stepsJ++)
+                    for (int j = X == 1 ? X - 1 : X - 2, stepsJ = 0; j < SIZEBOARD && stepsJ < ship_s + 2; j++, stepsJ++)
                     {
                         if (player[i][j] == 'S')
                         {
@@ -267,11 +134,13 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
             }
             else
             {
+                if (X - ship_s < 0)
+                    is_error = true;
                 if (X == 10)
                 {
                     ship_s--;
                 }
-                for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZE && i < Y + 1; i++)
+                for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZEBOARD && i < Y + 1; i++)
                 {
                     for (int j = X == 10 ? X - 1 : X, stepsJ = 0; j > 0 && stepsJ < ship_s + 2; j--, stepsJ++)
                     {
@@ -287,37 +156,25 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
         {
             if (direction == "up")
             {
+                if (Y - ship_s < 0)
+                    is_error = true;
                 if (Y == 10)
-                {
-                    ship_s--;
-                }
-                for (int j = X == 1 ? X - 1 : X - 2; j < SIZE && j < X + 1; j++)
-                {
+                        ship_s--;
+                for (int j = X == 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
                     for (int i = Y == 10 ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
-                    {
                         if (player[i][j] == 'S')
-                        {
                             is_error = true;
-                        }
-                    }
-                }
             }
             else
             {
+                if (Y + ship_s - 1 > 10)
+                    is_error = true;
                 if (Y == 1)
-                {
                     ship_s--;
-                }
-                for (int j = X == 1 ? X - 1 : X - 2; j < SIZE && j < X + 1; j++)
-                {
-                    for (int i = Y == 1 ? Y - 1 : Y - 2, stepsI = 0; i < SIZE && stepsI < ship_s + 2; i++, stepsI++)
-                    {
+                for (int j = X == 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
+                    for (int i = Y == 1 ? Y - 1 : Y - 2, stepsI = 0; i < SIZEBOARD && stepsI < ship_s + 2; i++, stepsI++)
                         if (player[i][j] == 'S')
-                        {
                             is_error = true;
-                        }
-                    }
-                }
             }
         }
     }
@@ -329,126 +186,167 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
     return is_error;
 }
 
-char** createPlayer1()
+char** placeBoard(char** player)
 {
-    char** pl1 = 0;
+    int X;
+    int Y;
+    int shipSize = 5;
+    string direction;
 
-    pl1 = new char* [SIZE];
+    printBoard(player);
 
-    for (int h = 0; h < SIZE; h++)
+    while (true)
     {
-        pl1[h] = new char[SIZE];
+        cout << endl << "Enter the vertical coordinate to place a five-deck ship:" << endl;
+        cin >> Y;
 
-        for (int w = 0; w < SIZE; w++)
+        cout << "Enter the horizontal coordinate to place a five-deck ship:" << endl;
+        cin >> X;
+
+        cout << "Enter the direction to place a five-deck ship:(up,down,left,right)" << endl;
+        cin >> direction;
+
+        if (error(X, Y, direction, player, shipSize))
         {
-            pl1[h][w] = 0;
+            cout << "ERRROOR" << endl;
+        }
+        else
+        {
+            break;
         }
     }
 
-    for (int i = 0; i < SIZE; i++)
-        for (int j = 0; j < SIZE; j++)
-            pl1[i][j] = '-';
+    player = placeShip(X, Y, direction, player, shipSize);
+    system("cls");
 
-    return pl1;
+    shipSize = 3;
+
+    for (int i = 0; i < 2; i++)
+    {
+        printBoard(player);
+
+        while (true)
+        {
+            cout << "Enter the vertical coordinate to place a three-deck ship " << i + 1 << " :" << endl;
+            cin >> Y;
+
+            cout << "Enter the horizontal coordinate to place a three-deck ship " << i + 1 << " :" << endl;
+            cin >> X;
+
+            cout << "Enter the direction to place a three-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
+            cin >> direction;
+
+            if (error(X, Y, direction, player, shipSize))
+            {
+                cout << "ERRROOR" << endl;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        player = placeShip(X, Y, direction, player, shipSize);
+        system("cls");
+    }
+
+    shipSize = 2;
+
+    for (int i = 0; i < 3; i++)
+    {
+        printBoard(player);
+
+        while (true)
+        {
+            cout << "Enter the vertical coordinate to place a two-deck ship " << i + 1 << " :" << endl;
+            cin >> Y;
+
+            cout << "Enter the horizontal coordinate to place a two-deck ship " << i + 1 << " :" << endl;
+            cin >> X;
+
+            cout << "Enter the direction to place a two-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
+            cin >> direction;
+
+            if (error(X, Y, direction, player, shipSize))
+            {
+                cout << "ERRROOR" << endl;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        player = placeShip(X, Y, direction, player, shipSize);
+        system("cls");
+    }
+
+    shipSize = 1;
+
+    for (int i = 0; i < 4; i++)
+    {
+        printBoard(player);
+
+        while (true)
+        {
+            cout << "Enter the vertical coordinate to place a one-deck ship " << i + 1 << " :" << endl;
+            cin >> Y;
+
+            cout << "Enter the horizontal coordinate to place a one-deck ship " << i + 1 << " :" << endl;
+            cin >> X;
+
+            if (error(X, Y, direction, player, shipSize))
+            {
+                cout << "ERRROOR" << endl;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        player = placeShip(X, Y, direction, player, shipSize);
+        system("cls");
+    }
+
+    return player;
 }
 
-char** createPlayer2()
+char** createBoard()
 {
-    char** pl2 = 0;
+    char** pl = 0;
+    pl = new char* [SIZEBOARD];
 
-    pl2 = new char* [SIZE];
-
-    for (int h = 0; h < SIZE; h++)
+    for (int h = 0; h < SIZEBOARD; h++)
     {
-        pl2[h] = new char[SIZE];
-
-        for (int w = 0; w < SIZE; w++)
-        {
-            pl2[h][w] = 0;
-        }
+        pl[h] = new char[SIZEBOARD];
+        for (int w = 0; w < SIZEBOARD; w++)
+            pl[h][w] = 0;
     }
 
-    for (int i = 0; i < SIZE; i++)
-        for (int j = 0; j < SIZE; j++)
-            pl2[i][j] = '-';
+    for (int i = 0; i < SIZEBOARD; i++)
+        for (int j = 0; j < SIZEBOARD; j++)
+            pl[i][j] = '-';
 
-    return pl2;
-}
-
-char** createPlayer1Hide()
-{
-    char** pl1 = 0;
-
-    pl1 = new char* [SIZE];
-
-    for (int h = 0; h < SIZE; h++)
-    {
-        pl1[h] = new char[SIZE];
-
-        for (int w = 0; w < SIZE; w++)
-        {
-            pl1[h][w] = 0;
-        }
-    }
-
-    for (int i = 0; i < SIZE; i++)
-        for (int j = 0; j < SIZE; j++)
-            pl1[i][j] = '-';
-
-    return pl1;
-}
-
-char** createPlayer2Hide()
-{
-    char** pl2 = 0;
-
-    pl2 = new char* [SIZE];
-
-    for (int h = 0; h < SIZE; h++)
-    {
-        pl2[h] = new char[SIZE];
-
-        for (int w = 0; w < SIZE; w++)
-        {
-            pl2[h][w] = 0;
-        }
-    }
-
-    for (int i = 0; i < SIZE; i++)
-        for (int j = 0; j < SIZE; j++)
-            pl2[i][j] = '-';
-
-    return pl2;
+    return pl;
 }
 
 void DeleteBoards(char** player1, char** player2, char** player1Hide, char** player2Hide)
 {
-    for (int i = 0; i < SIZE; i++)
-    {
+    for (int i = 0; i < SIZEBOARD; i++)
         delete[] player1[i];
-    }
-
     delete[] player1;
 
-    for (int i = 0; i < SIZE; i++)
-    {
+    for (int i = 0; i < SIZEBOARD; i++)
         delete[] player2[i];
-    }
-
     delete[] player2;
 
-    for (int i = 0; i < SIZE; i++)
-    {
+    for (int i = 0; i < SIZEBOARD; i++)
         delete[] player1Hide[i];
-    }
-
     delete[] player1Hide;
 
-    for (int i = 0; i < SIZE; i++)
-    {
+    for (int i = 0; i < SIZEBOARD; i++)
         delete[] player2Hide[i];
-    }
-
     delete[] player2Hide;
 }
 
@@ -456,545 +354,22 @@ void DeleteBoards(char** player1, char** player2, char** player1Hide, char** pla
 int main()
 {
     bool is_player1_hit = true;
-
     bool is_game_over = false;
 
-    int who_win; 
-
     string won_player;
-
-    int X;
-
-    int Y;
-
-    int ship_SIZE = 5;
-
     string direction;
 
-    char** player1 = createPlayer1();
-
-    char** player1Hide = createPlayer1Hide();
-
-    char** player2 = createPlayer2();
-
-    char** player2Hide = createPlayer2Hide();
-
-    printBoard(player1);
-
-    while (true)
-    {
-        cout << endl << "Enter the vertical coordinate to place a five-deck ship:" << endl;
-
-        cin >> Y;
-
-        cout << "Enter the horizontal coordinate to place a five-deck ship:" << endl;
-
-        cin >> X;
-
-        cout << "Enter the direction to place a five-deck ship:(up,down,left,right)" << endl;
-
-        cin >> direction;
-
-        if (!(error(X, Y, direction, player1, ship_SIZE)))
-        {
-            if (direction == "left" || direction == "right")
-            {
-                if (direction == "right")
-                {
-                    if (X + 4 <= 10)
-                        break;
-                    else
-                    {
-                        cout << "Invalid value of X" << endl;
-                    }
-                }
-                else if (direction == "left")
-                {
-                    if (X - 5 >= 0)
-                        break;
-                    else
-                    {
-                        cout << "Invalid value of X" << endl;
-                    }
-                }
-            }
-            else
-            {
-                if (direction == "up")
-                {
-                    if (Y - 5 >= 0)
-                        break;
-                    else
-                    {
-                        cout << "Invalid value of Y" << endl;
-                    }
-                }
-                else if (direction == "down")
-                {
-                    if (Y + 4 <= 10)
-                        break;
-                    else
-                    {
-                        cout << "Invalid value of Y" << endl;
-                    }
-                }
-            }
-        }
-        else
-        {
-            cout << "Invalid value of X/Y" << endl;
-        }
-    }
-
-    player1 = five_deck_ship(X, Y, direction, player1);
-
-    ClearScreen();
-
-    ship_SIZE = 3;
-
-    for (int i = 0; i < 2; i++)
-    {
-        printBoard(player1);
-
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a three-deck ship " << i + 1 << " :" << endl;
-
-            cin >> Y;
-
-            cout << "Enter the horizontal coordinate to place a three-deck ship " << i + 1 << " :" << endl;
-
-            cin >> X;
-
-            cout << "Enter the direction to place a three-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
-
-            cin >> direction;
-
-            if (!(error(X, Y, direction, player1, ship_SIZE)))
-            {
-                if (direction == "left" || direction == "right")
-                {
-                    if (direction == "right")
-                    {
-                        if (X + 2 <= 10)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of X" << endl;
-                        }
-                    }
-                    else if (direction == "left")
-                    {
-                        if (X - 3 >= 0)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of X" << endl;
-                        }
-                    }
-                }
-                else
-                {
-                    if (direction == "up")
-                    {
-                        if (Y - 3 >= 0)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of Y" << endl;
-                        }
-                    }
-                    else if (direction == "down")
-                    {
-                        if (Y + 2 <= 10)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of Y" << endl;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                cout << "There is a ship in this cells / Invalid value of X/Y" << endl;
-            }
-
-        }
-
-        player1 = three_deck_ship(X, Y, direction, player1);
-
-        ClearScreen();
-    }
-
-    ship_SIZE = 2;
-
-    for (int i = 0; i < 3; i++)
-    {
-        printBoard(player1);
-
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a two-deck ship " << i + 1 << " :" << endl;
-
-            cin >> Y;
-
-            cout << "Enter the horizontal coordinate to place a two-deck ship " << i + 1 << " :" << endl;
-
-            cin >> X;
-
-            cout << "Enter the direction to place a two-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
-
-            cin >> direction;
-
-            if (!(error(X, Y, direction, player1, ship_SIZE)))
-            {
-                if (direction == "left" || direction == "right")
-                {
-                    if (direction == "right")
-                    {
-                        if (X + 1 <= 10)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of X" << endl;
-                        }
-                    }
-                    else if (direction == "left")
-                    {
-                        if (X - 2 >= 0)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of X" << endl;
-                        }
-                    }
-                }
-                else
-                {
-                    if (direction == "up")
-                    {
-                        if (Y - 2 >= 0)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of Y" << endl;
-                        }
-                    }
-                    else if (direction == "down")
-                    {
-                        if (Y + 1 <= 10)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of Y" << endl;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                cout << "There is a ship in this cells / Invalid value of X/Y" << endl;
-            }
-
-        }
-
-        player1 = two_deck_ship(X, Y, direction, player1);
-
-        ClearScreen();
-    }
-
-    ship_SIZE = 1;
-
-    for (int i = 0; i < 4; i++)
-    {
-        printBoard(player1);
-
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a one-deck ship " << i + 1 << " :" << endl;
-
-            cin >> Y;
-
-            cout << "Enter the horizontal coordinate to place a one-deck ship " << i + 1 << " :" << endl;
-
-            cin >> X;
-
-            if (!(error(X, Y, direction, player1, ship_SIZE)))
-            {
-                if ((X <= 10 && X >= 0) && (Y <= 10 && Y >= 0))
-                    break;
-                else
-                    cout << "Invalid value X or Y" << endl;
-            }
-            else
-            {
-                cout << "There is a ship in this cell / Invalid value of X/Y" << endl;
-            }
-        }
-
-        player1 = one_deck_ship(X, Y, player1);
-
-        ClearScreen();
-    }
-
-    ship_SIZE = 5;
-
-    printBoard(player2);
-
-    while (true)
-    {
-        cout << endl << "Enter the vertical coordinate to place a five-deck ship:" << endl;
-
-        cin >> Y;
-
-        cout << "Enter the horizontal coordinate to place a five-deck ship:" << endl;
-
-        cin >> X;
-
-        cout << "Enter the direction to place a five-deck ship:(up,down,left,right)" << endl;
-
-        cin >> direction;
-
-        if (!(error(X, Y, direction, player2, ship_SIZE)))
-        {
-            if (direction == "left" || direction == "right")
-            {
-                if (direction == "right")
-                {
-                    if (X + 4 <= 10)
-                        break;
-                    else
-                    {
-                        cout << "Invalid value of X" << endl;
-                    }
-                }
-                else if (direction == "left")
-                {
-                    if (X - 5 >= 0)
-                        break;
-                    else
-                    {
-                        cout << "Invalid value of X" << endl;
-                    }
-                }
-            }
-            else
-            {
-                if (direction == "up")
-                {
-                    if (Y - 5 >= 0)
-                        break;
-                    else
-                    {
-                        cout << "Invalid value of Y" << endl;
-                    }
-                }
-                else if (direction == "down")
-                {
-                    if (Y + 4 <= 10)
-                        break;
-                    else
-                    {
-                        cout << "Invalid value of Y" << endl;
-                    }
-                }
-            }
-        }
-        else
-        {
-            cout << "There is a ship in this cells / Invalid value of X/Y" << endl;
-        }
-    }
-
-    player2 = five_deck_ship(X, Y, direction, player2);
-
-    ClearScreen();
-
-    ship_SIZE = 3;
-
-    for (int i = 0; i < 2; i++)
-    {
-        printBoard(player2);
-
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a three-deck ship " << i + 1 << " :" << endl;
-
-            cin >> Y;
-
-            cout << "Enter the horizontal coordinate to place a three-deck ship " << i + 1 << " :" << endl;
-
-            cin >> X;
-
-            cout << "Enter the direction to place a three-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
-
-            cin >> direction;
-
-            if (!(error(X, Y, direction, player2, ship_SIZE)))
-            {
-                if (direction == "left" || direction == "right")
-                {
-                    if (direction == "right")
-                    {
-                        if (X + 2 <= 10)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of X" << endl;
-                        }
-                    }
-                    else if (direction == "left")
-                    {
-                        if (X - 3 >= 0)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of X" << endl;
-                        }
-                    }
-                }
-                else
-                {
-                    if (direction == "up")
-                    {
-                        if (Y - 3 >= 0)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of Y" << endl;
-                        }
-                    }
-                    else if (direction == "down")
-                    {
-                        if (Y + 2 <= 10)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of Y" << endl;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                cout << "There is a ship in this cells / Invalid value of X/Y" << endl;
-            }
-        }
-
-        player2 = three_deck_ship(X, Y, direction, player2);;
-
-        ClearScreen();
-    }
-
-    ship_SIZE = 2;
-
-    for (int i = 0; i < 3; i++)
-    {
-        printBoard(player2);
-
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a two-deck ship " << i + 1 << " :" << endl;
-
-            cin >> Y;
-
-            cout << "Enter the horizontal coordinate to place a two-deck ship " << i + 1 << " :" << endl;
-
-            cin >> X;
-
-            cout << "Enter the direction to place a two-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
-
-            cin >> direction;
-
-            if (!(error(X, Y, direction, player2, ship_SIZE)))
-            {
-                if (direction == "left" || direction == "right")
-                {
-                    if (direction == "right")
-                    {
-                        if (X + 1 <= 10)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of X" << endl;
-                        }
-                    }
-                    else if (direction == "left")
-                    {
-                        if (X - 2 >= 0)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of X" << endl;
-                        }
-                    }
-                }
-                else
-                {
-                    if (direction == "up")
-                    {
-                        if (Y - 2 >= 0)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of Y" << endl;
-                        }
-                    }
-                    else if (direction == "down")
-                    {
-                        if (Y + 1 <= 10)
-                            break;
-                        else
-                        {
-                            cout << "Invalid value of Y" << endl;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                cout << "There is a ship in this cells / Invalid value of X/Y" << endl;
-            }
-        }
-
-
-        player2 = two_deck_ship(X, Y, direction, player2);
-
-        ClearScreen();
-    }
-
-    ship_SIZE = 1;
-
-
-    for (int i = 0; i < 4; i++)
-    {
-        printBoard(player2);
-
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a one-deck ship " << i + 1 << " :" << endl;
-
-            cin >> Y;
-
-            cout << "Enter the horizontal coordinate to place a one-deck ship " << i + 1 << " :" << endl;
-
-            cin >> X;
-
-            if (!(errorOneDeskShip(X, Y, player2, ship_SIZE)))
-            {
-                break;
-            }
-            else
-            {
-                cout << "There is a ship in this cell / Invalid value of X/Y" << endl;
-            }
-        }
-
-        player2 = one_deck_ship(X, Y, player2);
-
-        ClearScreen();
-    }
+    int X;
+    int Y;
+    int shipSize = 5;
+
+    char** player1 = createBoard();
+    char** player1Hide = createBoard();
+    char** player2 = createBoard();
+    char** player2Hide = createBoard();
+
+    player1 = placeBoard(player1);
+    player2 = placeBoard(player2);
 
     while (!is_game_over)
     {
@@ -1007,21 +382,21 @@ int main()
                 while (true)
                 {
                     cout << "Player 1, enter the vertical coordinate for the shot:" << endl;
-
                     cin >> Y;
 
                     cout << "Player 1, enter the horizontal coordinate for the shot:" << endl;
-
                     cin >> X;
 
                     if ((X <= 10 && X >= 0) && (Y <= 10 && Y >= 0))
                         break;
+                    else
+                    {
+                        cout << "ERROR";
+                    }
                 }
 
                 player2Hide = shotBoard(X, Y, player2Hide, player2);
-
                 player2 = shotPlayer(X, Y, player2);
-
                 is_game_over = gameOver(player1, player2);
 
                 if (is_game_over)
@@ -1029,24 +404,19 @@ int main()
 
                 if (player2Hide[Y - 1][X - 1] == 'O')
                 {
-                    ClearScreen();
-
+                    system("cls");
                     printBoard(player2Hide);
 
                     cout << endl << "You miss";
-
                     Sleep(2000);
 
                     is_player1_hit = false;
-
-                    ClearScreen();
+                    system("cls");
 
                     break;
                 }
-
-                ClearScreen();
+                system("cls");
             }
-
         }
         else
         {
@@ -1057,21 +427,21 @@ int main()
                 while (true)
                 {
                     cout << "Player 2, enter the vertical coordinate for the shot:" << endl;
-
                     cin >> Y;
 
                     cout << "Player 2, enter the horizontal coordinate for the shot:" << endl;
-
                     cin >> X;
 
                     if ((X <= 10 && X >= 0) && (Y <= 10 && Y >= 0))
                         break;
+                    else
+                    {
+                        cout << "ERROR";
+                    }
                 }
 
                 player1Hide = shotBoard(X, Y, player1Hide, player1);
-
                 player1 = shotPlayer(X, Y, player1);
-
                 is_game_over = gameOver(player1, player2);
 
                 if (is_game_over)
@@ -1079,45 +449,43 @@ int main()
 
                 if (player1Hide[Y - 1][X - 1] == 'O')
                 {
-                    ClearScreen();
-
+                    system("cls");
                     printBoard(player1Hide);
 
                     cout << endl << "You miss";
-
                     Sleep(2000);
 
                     is_player1_hit = true;
-
-                    ClearScreen();
+                    system("cls");
 
                     break;
                 }
-
-                ClearScreen();
+                system("cls");
             }
         }
     }
 
-    ClearScreen();
+    system("cls");
 
-    if (is_player1_win(player1, player2))
+    if (is_player1_win(player1))
         won_player = " player 1 ";
     else
         won_player = " player 2 ";
 
     cout << "Congratulation" << won_player << "!!!" << endl << "YOU WON!!" << endl;
 
-    if (is_player1_win)
+    if (is_player1_win(player1))
     {
+        cout << "WIN BOARD" << endl;
         printBoard(player1);
-        cout << endl;
+        cout << endl << "LOSE BOARD";
         printBoard(player2);
     }
     else
     {
+        cout << "WIN BOARD" << endl;
         printBoard(player2);
-        cout << endl;
+        cout << endl << "LOSE BOARD";
         printBoard(player1);
     }
 
