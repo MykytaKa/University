@@ -85,6 +85,7 @@ void printBoard(char** player)
 
 char** placeShip(int X5, int Y5, string direction5, char** player, int shipSize)
 {
+    /////////////////////////////////////////////////////////// func
     if (direction5 == "left" || direction5 == "right")
     {
         for (int i = Y5 - 1, j = X5 - 1, magnifier = direction5 == "right" ? magnifier = 1 : magnifier = -1, steps = 0; steps < shipSize; j += magnifier)
@@ -101,6 +102,7 @@ char** placeShip(int X5, int Y5, string direction5, char** player, int shipSize)
             steps++;
         }
     }
+    ////////////////////////////////////////////////////////////
 
     return player;
 }
@@ -108,7 +110,7 @@ char** placeShip(int X5, int Y5, string direction5, char** player, int shipSize)
 bool error(int X, int Y, string direction, char** player, int ship_s)
 {
     bool is_error = false;
-
+/////////////////////////////////////////////////////////////////// unnecessary if ///////// function? ///////// const //// brakets
     if (!(X > 10 || X < 0) && !(Y > 10 || Y < 0))
     {
         if (direction == "left" || direction == "right")
@@ -156,12 +158,12 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
         {
             if (direction == "up")
             {
-                if (Y - ship_s < 0)
+                if (Y - ship_s < 0) ////////////
                     is_error = true;
-                if (Y == 10)
-                        ship_s--;
-                for (int j = X == 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
-                    for (int i = Y == 10 ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
+                if (Y == 10)       //////////////
+                    ship_s--;
+                for (int j = X == 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++) ////////////////////
+                    for (int i = Y == 10 ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++) ////////////
                         if (player[i][j] == 'S')
                             is_error = true;
             }
@@ -178,10 +180,9 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
             }
         }
     }
+    ////////////////////////////////////////////////////
     else
-    {
         is_error = true;
-    }
 
     return is_error;
 }
@@ -194,7 +195,7 @@ char** placeBoard(char** player)
     string direction;
 
     printBoard(player);
-
+    /////////////////////////////////////////////////////////////////////////////////////////////////////// func
     while (true)
     {
         cout << endl << "Enter the vertical coordinate to place a five-deck ship:" << endl;
@@ -206,14 +207,12 @@ char** placeBoard(char** player)
         cout << "Enter the direction to place a five-deck ship:(up,down,left,right)" << endl;
         cin >> direction;
 
-        if (error(X, Y, direction, player, shipSize))
-        {
-            cout << "ERRROOR" << endl;
-        }
-        else
-        {
+        ////////////////////////////////
+        if (!error(X, Y, direction, player, shipSize))
             break;
-        }
+        else
+            cout << "ERRROOR" << endl;
+        ///////////////////////////////
     }
 
     player = placeShip(X, Y, direction, player, shipSize);
@@ -236,6 +235,7 @@ char** placeBoard(char** player)
             cout << "Enter the direction to place a three-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
             cin >> direction;
 
+            //////////////////////
             if (error(X, Y, direction, player, shipSize))
             {
                 cout << "ERRROOR" << endl;
@@ -244,6 +244,7 @@ char** placeBoard(char** player)
             {
                 break;
             }
+            ////////////////////////////
         }
 
         player = placeShip(X, Y, direction, player, shipSize);
@@ -295,6 +296,12 @@ char** placeBoard(char** player)
             cout << "Enter the horizontal coordinate to place a one-deck ship " << i + 1 << " :" << endl;
             cin >> X;
 
+            if (shipSize != 1)
+            {
+                cout << "Enter the direction to place a two-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
+                cin >> direction;
+            }
+
             if (error(X, Y, direction, player, shipSize))
             {
                 cout << "ERRROOR" << endl;
@@ -308,7 +315,7 @@ char** placeBoard(char** player)
         player = placeShip(X, Y, direction, player, shipSize);
         system("cls");
     }
-
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     return player;
 }
 
@@ -331,8 +338,10 @@ char** createBoard()
     return pl;
 }
 
+
 void DeleteBoards(char** player1, char** player2, char** player1Hide, char** player2Hide)
 {
+    /////////////////////////////////////////////////////////// func
     for (int i = 0; i < SIZEBOARD; i++)
         delete[] player1[i];
     delete[] player1;
@@ -348,6 +357,7 @@ void DeleteBoards(char** player1, char** player2, char** player1Hide, char** pla
     for (int i = 0; i < SIZEBOARD; i++)
         delete[] player2Hide[i];
     delete[] player2Hide;
+    //////////////////////////////////////////////////////////////
 }
 
 
@@ -375,6 +385,7 @@ int main()
     {
         if (is_player1_hit)
         {
+            ////////////////////////////////////////////////////////////////// func
             while (true)
             {
                 printBoard(player2Hide);
@@ -462,18 +473,22 @@ int main()
                 }
                 system("cls");
             }
+            ///////////////////////////////////////////////////////////////
         }
     }
 
     system("cls");
 
+    //////////////////////////////////// ternary operator
     if (is_player1_win(player1))
         won_player = " player 1 ";
     else
         won_player = " player 2 ";
+    //////////////////////////////////////////////
 
     cout << "Congratulation" << won_player << "!!!" << endl << "YOU WON!!" << endl;
 
+    ////////////////////////////////////////////// func
     if (is_player1_win(player1))
     {
         cout << "WIN BOARD" << endl;
@@ -488,6 +503,7 @@ int main()
         cout << endl << "LOSE BOARD";
         printBoard(player1);
     }
+    //////////////////////////////////////////////////
 
     return 0;
 }
