@@ -53,11 +53,6 @@ char** shotPlayer(int Xshot, int Yshot, char** defendPlayer)
 {
     if (defendPlayer[Yshot - 1][Xshot - 1] == 'S')
         defendPlayer[Yshot - 1][Xshot - 1] = 'X';
-    else if (defendPlayer[Yshot - 1][Xshot - 1] == 'X')
-    {
-        cout << endl << "You've already shot at this cell";
-        Sleep(2000);
-    }
     else
         defendPlayer[Yshot - 1][Xshot - 1] = 'O';
 
