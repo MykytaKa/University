@@ -1,9 +1,14 @@
 #include <iostream>
 #include <windows.h>
+#include <ctype.h>
 
 using namespace std;
 
 const int SIZEBOARD = 10;
+const int UPPERLIM = 10;
+const int LOWERLIM = 0;
+const string Directions[] = {"right", "left", "up", "down" };
+
 
 bool playerLose(char** player)
 {
@@ -18,11 +23,8 @@ bool playerLose(char** player)
 }
 
 bool gameOver(char** player1, char** player2)
-{
-    bool lose_player1 = playerLose(player1);
-    bool lose_player2 = playerLose(player2);    
-
-    return lose_player1 || lose_player2;
+{   
+    return playerLose(player1) || playerLose(player2);
 }
 
 bool is_player1_win(char** player1)
@@ -51,15 +53,20 @@ char** shotPlayer(int Xshot, int Yshot, char** defendPlayer)
 {
     if (defendPlayer[Yshot - 1][Xshot - 1] == 'S')
         defendPlayer[Yshot - 1][Xshot - 1] = 'X';
+    else if (defendPlayer[Yshot - 1][Xshot - 1] == 'X')
+    {
+        cout << endl << "You've already shot at this cell";
+        Sleep(2000);
+    }
     else
         defendPlayer[Yshot - 1][Xshot - 1] = 'O';
 
     return defendPlayer;
 }
 
-void printBoard(char** player)
+void printBoard(char** player, string text)
 {
-    cout << "Your board" << endl << endl << "    ";
+    cout << text << endl << endl << "    ";
 
     for (int i = 0; i < SIZEBOARD; i++)
         cout << i + 1 << "  ";
@@ -83,171 +90,193 @@ void printBoard(char** player)
     }
 }
 
-char** placeShip(int X5, int Y5, string direction5, char** player, int shipSize)
+char** placeShip(int X, int Y, string direction, char** player, int shipSize)
 {
-    /////////////////////////////////////////////////////////// func
-    if (direction5 == "left" || direction5 == "right")
+    if (direction == "left" || direction == "right")
     {
-        for (int i = Y5 - 1, j = X5 - 1, magnifier = direction5 == "right" ? magnifier = 1 : magnifier = -1, steps = 0; steps < shipSize; j += magnifier)
+        int magnifier = direction == "right" ? magnifier = 1 : magnifier = -1;
+
+        for (int i = Y - 1, j = X - 1, steps = 0; steps < shipSize; j += magnifier)
         {
             player[i][j] = 'S';
             steps++;
         }
-    }
+    } 
     else
     {
-        for (int i = Y5 - 1, j = X5 - 1, magnifier = direction5 == "up" ? magnifier = -1 : magnifier = 1, steps = 0; steps < shipSize; i += magnifier)
+        int magnifier = direction == "up" ? magnifier = -1 : magnifier = 1;
+
+        for (int i = Y - 1, j = X - 1, steps = 0; steps < shipSize; i += magnifier)
         {
             player[i][j] = 'S';
             steps++;
         }
     }
-    ////////////////////////////////////////////////////////////
-
+        
     return player;
+}
+
+bool isCorrectDirection(string direction)
+{
+    bool errorDirection = true;
+    for (int i = 0; i < 4; i++)
+        if (direction == Directions[i])
+        {
+            errorDirection = false;
+            break;
+        }
+
+    return errorDirection;
 }
 
 bool error(int X, int Y, string direction, char** player, int ship_s)
 {
     bool is_error = false;
-/////////////////////////////////////////////////////////////////// unnecessary if ///////// function? ///////// const //// brakets
-    if (!(X > 10 || X < 0) && !(Y > 10 || Y < 0))
+
+    if (!(X > UPPERLIM || X < LOWERLIM) && !(Y > UPPERLIM || Y < LOWERLIM))
     {
-        if (direction == "left" || direction == "right")
+        if (ship_s == 1)
         {
-            if (direction == "right")
-            {
-                if (X + ship_s - 1 > 10)
-                    is_error = true;
-                if (X == 1)
-                {
-                    ship_s--;
-                }
-                for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZEBOARD && i < Y + 1; i++)
-                {
-                    for (int j = X == 1 ? X - 1 : X - 2, stepsJ = 0; j < SIZEBOARD && stepsJ < ship_s + 2; j++, stepsJ++)
-                    {
-                        if (player[i][j] == 'S')
-                        {
-                            is_error = true;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if (X - ship_s < 0)
-                    is_error = true;
-                if (X == 10)
-                {
-                    ship_s--;
-                }
-                for (int i = Y == 1 ? Y - 1 : Y - 2; i < SIZEBOARD && i < Y + 1; i++)
-                {
-                    for (int j = X == 10 ? X - 1 : X, stepsJ = 0; j > 0 && stepsJ < ship_s + 2; j--, stepsJ++)
-                    {
-                        if (player[i][j] == 'S')
-                        {
-                            is_error = true;
-                        }
-                    }
-                }
-            }
+            for (int j = X == LOWERLIM + 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
+                for (int i = Y == UPPERLIM ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
+                    if (player[i][j] == 'S')
+                        is_error = true;
         }
         else
         {
-            if (direction == "up")
+            if (direction == "right")
             {
-                if (Y - ship_s < 0) ////////////
+                if (X + ship_s - 1 > UPPERLIM)
                     is_error = true;
-                if (Y == 10)       //////////////
+                if (X == LOWERLIM + 1)
                     ship_s--;
-                for (int j = X == 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++) ////////////////////
-                    for (int i = Y == 10 ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++) ////////////
+                for (int i = Y == LOWERLIM + 1 ? Y - 1 : Y - 2; i < SIZEBOARD && i < Y + 1; i++)
+                    for (int j = X == LOWERLIM + 1 ? X - 1 : X - 2, stepsJ = 0; j < SIZEBOARD && stepsJ < ship_s + 2; j++, stepsJ++)
+                        if (player[i][j] == 'S')
+                            is_error = true;
+
+            }
+            else if (direction == "left")
+            {
+                if (X - ship_s < LOWERLIM)
+                    is_error = true;
+                if (X == UPPERLIM)
+                    ship_s--;
+                for (int i = Y == LOWERLIM + 1 ? Y - 1 : Y - 2; i < SIZEBOARD && i < Y + 1; i++)
+                    for (int j = X == UPPERLIM ? X - 1 : X, stepsJ = 0; j >= 0 && stepsJ < ship_s + 2; j--, stepsJ++)
                         if (player[i][j] == 'S')
                             is_error = true;
             }
-            else
+            else if (direction == "up")
             {
-                if (Y + ship_s - 1 > 10)
+                if (Y - ship_s < LOWERLIM)
                     is_error = true;
-                if (Y == 1)
+                if (Y == UPPERLIM)
                     ship_s--;
-                for (int j = X == 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
-                    for (int i = Y == 1 ? Y - 1 : Y - 2, stepsI = 0; i < SIZEBOARD && stepsI < ship_s + 2; i++, stepsI++)
+                for (int j = X == LOWERLIM + 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
+                    for (int i = Y == UPPERLIM ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
+                        if (player[i][j] == 'S')
+                            is_error = true;
+            }
+            else if (direction == "down")
+            {
+                if (Y + ship_s - 1 > UPPERLIM)
+                    is_error = true;
+                if (Y == LOWERLIM + 1)
+                    ship_s--;
+                for (int j = X == LOWERLIM + 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
+                    for (int i = Y == LOWERLIM + 1 ? Y - 1 : Y - 2, stepsI = 0; i < SIZEBOARD && stepsI < ship_s + 2; i++, stepsI++)
                         if (player[i][j] == 'S')
                             is_error = true;
             }
         }
     }
-    ////////////////////////////////////////////////////
     else
         is_error = true;
 
     return is_error;
 }
 
-char** placeBoard(char** player)
+struct shipPosition
 {
-    int X;
-    int Y;
-    int shipSize = 5;
+public:
+    int x;
+    int y;
     string direction;
+};
 
-    printBoard(player);
-    /////////////////////////////////////////////////////////////////////////////////////////////////////// func
+shipPosition placeBoardFunc(int shipSize, char** player, int number)
+{
+    shipPosition ship;
+
     while (true)
     {
-        cout << endl << "Enter the vertical coordinate to place a five-deck ship:" << endl;
-        cin >> Y;
+        cout << "Enter the vertical coordinate to place a " << shipSize << "-deck ship ";
 
-        cout << "Enter the horizontal coordinate to place a five-deck ship:" << endl;
-        cin >> X;
-
-        cout << "Enter the direction to place a five-deck ship:(up,down,left,right)" << endl;
-        cin >> direction;
-
-        ////////////////////////////////
-        if (!error(X, Y, direction, player, shipSize))
-            break;
+        if (shipSize != 5)
+            cout << number + 1 << " :" << endl;
         else
+            cout << " :" << endl;
+
+        cin >> ship.y;
+
+        cout << "Enter the horizontal coordinate to place a " << shipSize << "-deck ship ";
+
+        if (shipSize != 5)
+            cout << number + 1 << " :" << endl;
+        else
+            cout << " :" << endl;
+
+        cin >> ship.x;
+        while (true)
+        {
+            if (shipSize != 1)
+            {
+                cout << "Enter the direction to place a " << shipSize << "-deck ship ";
+
+                if (shipSize != 5)
+                    cout << number + 1 << " :(up,down,left,right)" << endl;
+                else
+                    cout << " :(up,down,left,right)" << endl;
+
+                cin >> ship.direction;
+
+                if (!isCorrectDirection(ship.direction))
+                    break;
+                else
+                    cout << "ERROR" << endl;
+            }
+        }
+
+        if (error(ship.x, ship.y, ship.direction, player, shipSize))
             cout << "ERRROOR" << endl;
-        ///////////////////////////////
+        else
+            break;
     }
 
-    player = placeShip(X, Y, direction, player, shipSize);
+    return ship;
+}
+
+char** placeBoard(char** player)
+{
+    int shipSize = 5;
+
+    printBoard(player, "Your board");
+    
+    shipPosition ship = placeBoardFunc(shipSize, player, 0);
+
+    player = placeShip(ship.x, ship.y, ship.direction, player, shipSize);
     system("cls");
 
     shipSize = 3;
 
     for (int i = 0; i < 2; i++)
     {
-        printBoard(player);
+        printBoard(player, "Your board");
 
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a three-deck ship " << i + 1 << " :" << endl;
-            cin >> Y;
+        ship = placeBoardFunc(shipSize, player, i);
 
-            cout << "Enter the horizontal coordinate to place a three-deck ship " << i + 1 << " :" << endl;
-            cin >> X;
-
-            cout << "Enter the direction to place a three-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
-            cin >> direction;
-
-            //////////////////////
-            if (error(X, Y, direction, player, shipSize))
-            {
-                cout << "ERRROOR" << endl;
-            }
-            else
-            {
-                break;
-            }
-            ////////////////////////////
-        }
-
-        player = placeShip(X, Y, direction, player, shipSize);
+        player = placeShip(ship.x, ship.y, ship.direction, player, shipSize);
         system("cls");
     }
 
@@ -255,30 +284,11 @@ char** placeBoard(char** player)
 
     for (int i = 0; i < 3; i++)
     {
-        printBoard(player);
+        printBoard(player, "Your board");
 
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a two-deck ship " << i + 1 << " :" << endl;
-            cin >> Y;
+        ship = placeBoardFunc(shipSize, player, i);
 
-            cout << "Enter the horizontal coordinate to place a two-deck ship " << i + 1 << " :" << endl;
-            cin >> X;
-
-            cout << "Enter the direction to place a two-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
-            cin >> direction;
-
-            if (error(X, Y, direction, player, shipSize))
-            {
-                cout << "ERRROOR" << endl;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        player = placeShip(X, Y, direction, player, shipSize);
+        player = placeShip(ship.x, ship.y, ship.direction, player, shipSize);
         system("cls");
     }
 
@@ -286,36 +296,14 @@ char** placeBoard(char** player)
 
     for (int i = 0; i < 4; i++)
     {
-        printBoard(player);
+        printBoard(player, "Your board");
 
-        while (true)
-        {
-            cout << "Enter the vertical coordinate to place a one-deck ship " << i + 1 << " :" << endl;
-            cin >> Y;
+        ship = placeBoardFunc(shipSize, player, i);
 
-            cout << "Enter the horizontal coordinate to place a one-deck ship " << i + 1 << " :" << endl;
-            cin >> X;
-
-            if (shipSize != 1)
-            {
-                cout << "Enter the direction to place a two-deck ship " << i + 1 << " :(up,down,left,right)" << endl;
-                cin >> direction;
-            }
-
-            if (error(X, Y, direction, player, shipSize))
-            {
-                cout << "ERRROOR" << endl;
-            }
-            else
-            {
-                break;
-            }
-        }
-
-        player = placeShip(X, Y, direction, player, shipSize);
+        player = placeShip(ship.x, ship.y, ship.direction, player, shipSize);
         system("cls");
     }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
     return player;
 }
 
@@ -338,28 +326,85 @@ char** createBoard()
     return pl;
 }
 
+void DeleteBoardFunc(char** board)
+{
+    for (int i = 0; i < SIZEBOARD; i++)
+        delete[] board[i];
+    delete[] board;
+}
 
 void DeleteBoards(char** player1, char** player2, char** player1Hide, char** player2Hide)
 {
-    /////////////////////////////////////////////////////////// func
-    for (int i = 0; i < SIZEBOARD; i++)
-        delete[] player1[i];
-    delete[] player1;
-
-    for (int i = 0; i < SIZEBOARD; i++)
-        delete[] player2[i];
-    delete[] player2;
-
-    for (int i = 0; i < SIZEBOARD; i++)
-        delete[] player1Hide[i];
-    delete[] player1Hide;
-
-    for (int i = 0; i < SIZEBOARD; i++)
-        delete[] player2Hide[i];
-    delete[] player2Hide;
-    //////////////////////////////////////////////////////////////
+    DeleteBoardFunc(player1);
+    DeleteBoardFunc(player2);
+    DeleteBoardFunc(player1Hide);
+    DeleteBoardFunc(player2Hide);
 }
 
+void printWinLosePlayer(char** playerWon, char** playerLose)
+{
+    printBoard(playerWon, "WIN BOARD");
+    printBoard(playerLose, "LOSE BOARD");
+}
+
+struct game
+{
+public:
+    char** playerDefend;
+    char** playerDefendHide;
+    bool isGameOver;
+    bool is_player1_hit;
+};
+
+game playFunc(char** playerAttack, char** playerDefend, char** playerDefendHide, bool player1Hit, string text)
+{
+    game game1;
+    int X, Y;
+
+    while (true)
+    {
+        printBoard(playerDefendHide, "Enemy's board");
+
+        while (true)
+        {
+            cout << text << ", enter the vertical coordinate for the shot : " << endl;
+            cin >> Y;
+
+            cout << text << ", enter the horizontal coordinate for the shot:" << endl;
+            cin >> X;
+
+            if (isdigit(X) && isdigit(Y) && (X <= UPPERLIM && X >= LOWERLIM) && (Y <= UPPERLIM && Y >= LOWERLIM))
+                break;
+            else
+                cout << "ERROR";
+        }
+
+        game1.playerDefendHide = shotBoard(X, Y, playerDefendHide, playerDefend);
+        game1.playerDefend = shotPlayer(X, Y, playerDefend);
+        game1.isGameOver = gameOver(playerAttack, playerDefend);
+
+        if (playerDefendHide[Y - 1][X - 1] == 'O')
+        {
+            system("cls");
+            printBoard(playerDefendHide, "Enemy's board");
+
+            cout << endl << "You miss";
+            Sleep(2000);
+
+            game1.is_player1_hit = false;
+            system("cls");
+
+            break;
+        }
+
+        system("cls");
+
+        if (game1.isGameOver)
+            break;
+    }
+
+    return game1;
+}
 
 int main()
 {
@@ -367,10 +412,7 @@ int main()
     bool is_game_over = false;
 
     string won_player;
-    string direction;
 
-    int X;
-    int Y;
     int shipSize = 5;
 
     char** player1 = createBoard();
@@ -385,125 +427,35 @@ int main()
     {
         if (is_player1_hit)
         {
-            ////////////////////////////////////////////////////////////////// func
-            while (true)
-            {
-                printBoard(player2Hide);
+            game game1 = playFunc(player1, player2, player2Hide, is_player1_hit, "Player 1");
 
-                while (true)
-                {
-                    cout << "Player 1, enter the vertical coordinate for the shot:" << endl;
-                    cin >> Y;
-
-                    cout << "Player 1, enter the horizontal coordinate for the shot:" << endl;
-                    cin >> X;
-
-                    if ((X <= 10 && X >= 0) && (Y <= 10 && Y >= 0))
-                        break;
-                    else
-                    {
-                        cout << "ERROR";
-                    }
-                }
-
-                player2Hide = shotBoard(X, Y, player2Hide, player2);
-                player2 = shotPlayer(X, Y, player2);
-                is_game_over = gameOver(player1, player2);
-
-                if (is_game_over)
-                    break;
-
-                if (player2Hide[Y - 1][X - 1] == 'O')
-                {
-                    system("cls");
-                    printBoard(player2Hide);
-
-                    cout << endl << "You miss";
-                    Sleep(2000);
-
-                    is_player1_hit = false;
-                    system("cls");
-
-                    break;
-                }
-                system("cls");
-            }
+            player2 = game1.playerDefend;
+            player2Hide = game1.playerDefendHide;
+            is_player1_hit = game1.is_player1_hit;
+            is_game_over = game1.isGameOver;
         }
         else
         {
-            while (true)
-            {
-                printBoard(player1Hide);
+            game game1 = playFunc(player2, player1, player1Hide, is_player1_hit, "Player 2");
 
-                while (true)
-                {
-                    cout << "Player 2, enter the vertical coordinate for the shot:" << endl;
-                    cin >> Y;
-
-                    cout << "Player 2, enter the horizontal coordinate for the shot:" << endl;
-                    cin >> X;
-
-                    if ((X <= 10 && X >= 0) && (Y <= 10 && Y >= 0))
-                        break;
-                    else
-                    {
-                        cout << "ERROR";
-                    }
-                }
-
-                player1Hide = shotBoard(X, Y, player1Hide, player1);
-                player1 = shotPlayer(X, Y, player1);
-                is_game_over = gameOver(player1, player2);
-
-                if (is_game_over)
-                    break;
-
-                if (player1Hide[Y - 1][X - 1] == 'O')
-                {
-                    system("cls");
-                    printBoard(player1Hide);
-
-                    cout << endl << "You miss";
-                    Sleep(2000);
-
-                    is_player1_hit = true;
-                    system("cls");
-
-                    break;
-                }
-                system("cls");
-            }
-            ///////////////////////////////////////////////////////////////
+            player1 = game1.playerDefend;
+            player1Hide = game1.playerDefendHide;
+            is_player1_hit = game1.is_player1_hit;
+            is_game_over = game1.isGameOver;
         }
     }
 
     system("cls");
 
-    //////////////////////////////////// ternary operator
-    if (is_player1_win(player1))
-        won_player = " player 1 ";
-    else
-        won_player = " player 2 ";
-    //////////////////////////////////////////////
-
+    won_player = is_player1_win(player1) ? " player 1 " : " player 2 ";
     cout << "Congratulation" << won_player << "!!!" << endl << "YOU WON!!" << endl;
 
-    ////////////////////////////////////////////// func
     if (is_player1_win(player1))
-    {
-        cout << "WIN BOARD" << endl;
-        printBoard(player1);
-        cout << endl << "LOSE BOARD";
-        printBoard(player2);
-    }
+        printWinLosePlayer(player1, player2);
     else
-    {
-        cout << "WIN BOARD" << endl;
-        printBoard(player2);
-        cout << endl << "LOSE BOARD";
-        printBoard(player1);
-    }
-    //////////////////////////////////////////////////
+        printWinLosePlayer(player2, player1);
+
+    DeleteBoards(player1, player2, player1Hide, player2Hide);
 
     return 0;
 }
