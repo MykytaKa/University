@@ -7,7 +7,46 @@ using namespace std;
 const int SIZEBOARD = 10;
 const int UPPERLIM = 10;
 const int LOWERLIM = 0;
-const string Directions[] = { "right", "left", "up", "down" };  
+const string Directions[] = { "right", "left", "up", "down" }; 
+
+/*
+enum Direction {
+    RIGHT,
+    LEFT,
+    UP,
+    DOWN
+};
+
+const Direction Directions[] = { RIGHT,
+    LEFT,
+    UP,
+    DOWN };
+*/
+
+struct shipPosition
+{
+public:
+    int x;
+    int y;
+    string direction;
+};
+
+struct game
+{
+public:
+    char** playerAttack;
+    char** playerDefend;
+    char** playerDefendHide;
+    bool isGameOver;
+    bool is_player1_hit;
+};
+
+struct ShotPosition
+{
+public:
+    int x;
+    int y;
+};
 
 bool playerLose(char** player)
 {
@@ -26,9 +65,9 @@ bool gameOver(char** player1, char** player2)
     return playerLose(player1) || playerLose(player2);
 }
 
-char** shotBoard(int Xshot, int Yshot, char** boardDefendPlayer, char** defendPlayer)
+char** shotBoard(ShotPosition shot, char** boardDefendPlayer, char** defendPlayer)
 {
-    boardDefendPlayer[Yshot - 1][Xshot - 1] = defendPlayer[Yshot - 1][Xshot - 1] == 'S' ? 'X' : 'O';
+    boardDefendPlayer[shot.y - 1][shot.x - 1] = defendPlayer[shot.y - 1][shot.x - 1] == 'S' ? 'X' : 'O';
 
     return boardDefendPlayer;
 }
@@ -51,6 +90,8 @@ void printBoard(char** player, string text)
             cout << player[i][j] << "  ";
         cout << endl;
     }
+
+    cout << endl;
 }
 
 char** placeShipFunc(char** player, int i, int j, int magnifier, int shipSize)
@@ -64,18 +105,18 @@ char** placeShipFunc(char** player, int i, int j, int magnifier, int shipSize)
     return player;
 }
 
-char** placeShip(int X, int Y, string direction, char** player, int shipSize) //// TO DO ////////////////////// 
+char** placeShip(shipPosition ship, char** player, int shipSize) //// TO DO ////////////////////// 
 {
-    int magnifier = direction  == "right" || direction == "down" ? magnifier = 1 : magnifier = -1; /////// rightm down - enum
-    int i = Y - 1;
-    int j = X - 1;
-    if (direction == "left" || direction == "right")
+    int magnifier = ship.direction  == "right" || ship.direction == "down" ? magnifier = 1 : magnifier = -1;
+    int i = ship.y - 1;
+    int j = ship.x - 1;
+    if (ship.direction == "left" || ship.direction == "right")
     {
         player = placeShipFunc(player, i, j, magnifier, shipSize);
     }
     else
     {
-        for (int i = Y - 1, j = X - 1, steps = 0; steps < shipSize; i += magnifier)
+        for (int i = ship.y - 1, j = ship.x - 1, steps = 0; steps < shipSize; i += magnifier)
         {
             player[i][j] = 'S';
             steps++;
@@ -160,17 +201,9 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
     return is_error;
 }
 
-struct shipPosition
-{
-public:
-    int x;
-    int y;
-    string direction;
-};
-
 void getShipParameter(string tetxPosition, string textSeparator, int shipSize, int number)
 {
-    cout << "Enter the" << tetxPosition << "to place a " << shipSize << " - deck ship ";
+    cout << "Enter the" << tetxPosition << "to place a " << shipSize << " - deck ship";
 
     if (shipSize != 5)
         cout << number + 1;
@@ -183,18 +216,18 @@ shipPosition placeShipFunc(int shipSize, char** player, int number)
 
     while (true)
     {
-        getShipParameter("vertical coordinate", " :", shipSize, number);
+        getShipParameter(" vertical coordinate ", ":", shipSize, number);
         cin >> ship.y;
 
-        getShipParameter("horizontal coordinate", " :", shipSize, number);
+        getShipParameter(" horizontal coordinate ", ":", shipSize, number);
         cin >> ship.x;
 
         while (true && shipSize != 1)
         {
-                getShipParameter("direction", " :(up,down,left,right)", shipSize, number);
+                getShipParameter(" direction ", ":(up,down,left,right)", shipSize, number);
                 cin >> ship.direction;
-
-                if (!isCorrectDirection(ship.direction))  /// TODO /////////////////////////////////////////////
+                
+                if (!isCorrectDirection(ship.direction))  
                     break;
                 else
                     cout << "ERROR" << endl;
@@ -218,7 +251,7 @@ char** putShips(char** player, int shipSize, int amountShips)
 
         ship = placeShipFunc(shipSize, player, i);
 
-        player = placeShip(ship.x, ship.y, ship.direction, player, shipSize); /// Передавати усю структуру замість параметрів структури
+        player = placeShip(ship, player, shipSize); 
         system("cls");
     }
 
@@ -270,62 +303,65 @@ void printWinLosePlayer(char** playerWon, char** playerLose)
     printBoard(playerLose, "LOSE BOARD");
 }
 
-struct game
+ShotPosition EnterShotPosition(string text) 
 {
-public:
-    char** playerAttack;
-    char** playerDefend;
-    char** playerDefendHide;
-    bool isGameOver;
-    bool is_player1_hit;
-};
+    ShotPosition shot;
 
+    while (true)
+    {
+        cout << text << ", enter the vertical coordinate for the shot : " << endl;
+        cin >> shot.y;
+
+        cout << text << ", enter the horizontal coordinate for the shot:" << endl;
+        cin >> shot.x;
+
+        if ((shot.x <= UPPERLIM && shot.x >= LOWERLIM) && (shot.y <= UPPERLIM && shot.y >= LOWERLIM))
+            break;
+        else
+            cout << "ERROR";
+    }
+
+    return shot;
+}
+
+void func(bool& stop, game& game1)
+{
+    system("cls");
+    printBoard(game1.playerDefendHide, "Enemy's board");
+
+    cout << endl << "You miss";
+    Sleep(2000);
+
+    game1.is_player1_hit = false;
+    system("cls");
+
+    stop = false;
+}
 game playFunc(char** playerAttack, char** playerDefend, char** playerDefendHide, bool player1Hit, string text)
 {
     game game1;
-    int X, Y;
+    ShotPosition shot;
     bool stop = true;
 
     while (stop)
     {
         printBoard(playerDefendHide, "Enemy's board");
 
-        while (true) /////// make function //////////////////////////////////
-        {
-            cout << text << ", enter the vertical coordinate for the shot : " << endl;
-            cin >> Y;
-
-            cout << text << ", enter the horizontal coordinate for the shot:" << endl;
-            cin >> X;
-
-            if (isdigit(X) && isdigit(Y) && (X <= UPPERLIM && X >= LOWERLIM) && (Y <= UPPERLIM && Y >= LOWERLIM))
-                break;
-            else
-                cout << "ERROR";
-        }
-
-        game1.playerDefendHide = shotBoard(X, Y, playerDefendHide, playerDefend);
-        game1.playerDefend = shotBoard(X, Y, playerDefend, playerDefend);
+        shot = EnterShotPosition(text);
+        
+        game1.playerDefendHide = shotBoard(shot, playerDefendHide, playerDefend);
+        game1.playerDefend = shotBoard(shot, playerDefend, playerDefend);
         game1.isGameOver = gameOver(playerAttack, playerDefend);
 
-        if (playerDefendHide[Y - 1][X - 1] == 'O') ///////////////// make function with using adress
+        if (game1.playerDefendHide[shot.y - 1][shot.x - 1] == 'O')
         {
-            system("cls");
-            printBoard(playerDefendHide, "Enemy's board");
-
-            cout << endl << "You miss";
-            Sleep(2000);
-
-            game1.is_player1_hit = false;
-            system("cls");
-
-            break;
+            func(stop, game1);
         }
 
         system("cls");
 
         if (game1.isGameOver)
-            break;
+            stop = false;
     }
 
     return game1;
