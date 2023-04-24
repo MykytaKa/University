@@ -7,21 +7,12 @@ using namespace std;
 const int SIZEBOARD = 10;
 const int UPPERLIM = 10;
 const int LOWERLIM = 0;
-const string Directions[] = { "right", "left", "up", "down" }; 
 
-/*
-enum Direction {
-    RIGHT,
-    LEFT,
-    UP,
-    DOWN
-};
-
-const Direction Directions[] = { RIGHT,
-    LEFT,
-    UP,
-    DOWN };
-*/
+const string RIGHT = "right";
+const string LEFT = "left";
+const string UP = "up";
+const string DOWN = "down";
+const string Directions[] = { RIGHT, LEFT, UP, DOWN };
 
 struct shipPosition
 {
@@ -94,25 +85,16 @@ void printBoard(char** player, string text)
     cout << endl;
 }
 
-char** placeShipFunc(char** player, int i, int j, int magnifier, int shipSize)
+char** placeShip(shipPosition ship, char** player, int shipSize)
 {
-    for  (int steps = 0; steps < shipSize; j += magnifier)
+    int magnifier = ship.direction  == RIGHT || ship.direction == DOWN ? magnifier = 1 : magnifier = -1;
+    if (ship.direction == LEFT || ship.direction == RIGHT)
     {
-        player[i][j] = 'S';
-        steps++;
-    }
-
-    return player;
-}
-
-char** placeShip(shipPosition ship, char** player, int shipSize) //// TO DO ////////////////////// 
-{
-    int magnifier = ship.direction  == "right" || ship.direction == "down" ? magnifier = 1 : magnifier = -1;
-    int i = ship.y - 1;
-    int j = ship.x - 1;
-    if (ship.direction == "left" || ship.direction == "right")
-    {
-        player = placeShipFunc(player, i, j, magnifier, shipSize);
+        for (int i = ship.y - 1, j = ship.x - 1, steps = 0; steps < shipSize; j += magnifier)
+        {
+            player[i][j] = 'S';
+            steps++;
+        }
     }
     else
     {
@@ -149,7 +131,7 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
         }
         else
         {
-            if (direction == "right")
+            if (direction == RIGHT)
             {
                 if (X + ship_s - 1 > UPPERLIM)
                     is_error = true;
@@ -160,7 +142,7 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
                         if (player[i][j] == 'S')
                             is_error = true;
             }
-            else if (direction == "left")
+            else if (direction == LEFT)
             {
                 if (X - ship_s < LOWERLIM)
                     is_error = true;
@@ -171,7 +153,7 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
                         if (player[i][j] == 'S')
                             is_error = true;
             }
-            else if (direction == "up")
+            else if (direction == UP)
             {
                 if (Y - ship_s < LOWERLIM)
                     is_error = true;
@@ -182,7 +164,7 @@ bool error(int X, int Y, string direction, char** player, int ship_s)
                         if (player[i][j] == 'S')
                             is_error = true;
             }
-            else if (direction == "down")
+            else if (direction == DOWN)
             {
                 if (Y + ship_s - 1 > UPPERLIM)
                     is_error = true;
@@ -210,7 +192,7 @@ void getShipParameter(string tetxPosition, string textSeparator, int shipSize, i
     cout << textSeparator << endl;
 }
 
-shipPosition placeShipFunc(int shipSize, char** player, int number)
+shipPosition placeShipFunc(int shipSize, char** player, int number) 
 {
     shipPosition ship;
 
@@ -388,7 +370,7 @@ int main()
     {
         if (is_player1_hit)
         {
-            game1 = playFunc(player1, player2, player2Hide, is_player1_hit, "Player 1"); ///// TO DO /////////////////
+            game1 = playFunc(player1, player2, player2Hide, is_player1_hit, "Player 1");
 
             player2 = game1.playerDefend;
             player2Hide = game1.playerDefendHide;
@@ -420,269 +402,3 @@ int main()
 
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*#include <iostream>
-#include <windows.h>
-#include <ctype.h>
-
-using namespace std;  
-
-const int SIZEBOARD = 10; 
-const int UPPERLIM = 10; 
-const int LOWERLIM = 0; 
-const string Directions[] = { "right", "left", "up", "down" }; 
- 
-class Board
-{
-public:
-    char** PlayerBoard;
-    char** PlayerHideBoard;
-
-    Board()
-    {
-        PlayerBoard = 0;
-        PlayerBoard = new char* [SIZEBOARD];
-
-        for (int h = 0; h < SIZEBOARD; h++)
-        {
-            PlayerBoard[h] = new char[SIZEBOARD];
-            for (int w = 0; w < SIZEBOARD; w++)
-                PlayerBoard[h][w] = 0;
-        }
-
-        for (int i = 0; i < SIZEBOARD; i++)
-            for (int j = 0; j < SIZEBOARD; j++)
-                PlayerBoard[i][j] = '-';
-
-        PlayerHideBoard = 0;
-        PlayerHideBoard = new char* [SIZEBOARD];
-
-        for (int h = 0; h < SIZEBOARD; h++)
-        {
-            PlayerHideBoard[h] = new char[SIZEBOARD];
-            for (int w = 0; w < SIZEBOARD; w++)
-                PlayerHideBoard[h][w] = 0;
-        }
-
-        for (int i = 0; i < SIZEBOARD; i++)
-            for (int j = 0; j < SIZEBOARD; j++)
-                PlayerHideBoard[i][j] = '-';
-    }
-
-    ~Board()
-    {
-        for (int i = 0; i < SIZEBOARD; i++)
-            delete[] PlayerBoard[i];
-        delete[] PlayerBoard;
-
-        for (int i = 0; i < SIZEBOARD; i++)
-            delete[] PlayerHideBoard[i];
-        delete[] PlayerHideBoard;
-    }
-
-    void printBoard(char** board, string text)
-    {
-        cout << text << endl << endl << "    ";
-
-        for (int i = 0; i < SIZEBOARD; i++)
-            cout << i + 1 << "  ";
-
-        cout << endl;
-
-        for (int i = 0; i < SIZEBOARD - 1; i++)
-        {
-            cout << " " << i + 1 << "  ";
-            for (int j = 0; j < SIZEBOARD; j++)
-                cout << board[i][j] << "  ";
-            cout << endl;
-        }
-
-        for (int i = SIZEBOARD - 1; i < SIZEBOARD; i++)
-        {
-            cout << i + 1 << "  ";
-            for (int j = 0; j < SIZEBOARD; j++)
-                cout << board[i][j] << "  ";
-            cout << endl;
-        }
-    }
-};
-
-class Ship
-{
-public:
-    int x, y, size;
-    string direction;
-
-    void setPosition()
-    {
-        cout << "Enter the vertical coordinate to place a " << size << "-deck ship ";
-
-        if (size != 5)
-            cout << 0 + 1 << " :" << endl;
-        else
-            cout << " :" << endl;
-
-        cin >> y;
-
-        cout << "Enter the horizontal coordinate to place a " << size << "-deck ship ";
-
-        if (size != 5)
-            cout << 0 + 1 << " :" << endl;
-        else
-            cout << " :" << endl;
-
-        cin >> x;
-
-        if (size != 1)
-        {
-            cout << "Enter the direction to place a " << size << "-deck ship ";
-
-            if (size != 5)
-                cout << 0 + 1 << " :(up,down,left,right)" << endl;
-            else
-                cout << " :(up,down,left,right)" << endl;
-
-            cin >> direction;
-        }
-    }
-
-    char** place(char** pl)
-    {
-        if (direction == "left" || direction == "right")
-        {
-            int magnifier = direction == "right" ? magnifier = 1 : magnifier = -1;
-
-            for (int i = y - 1, j = x - 1, steps = 0; steps < size; j += magnifier)
-            {
-                pl[i][j] = 'S';
-                steps++;
-            }
-        }
-        else
-        {
-            int magnifier = direction == "up" ? magnifier = -1 : magnifier = 1;
-
-            for (int i = y - 1, j = x - 1, steps = 0; steps < size; i += magnifier)
-            {
-                pl[i][j] = 'S';
-                steps++;
-            }
-        }
-
-        return pl;
-    }
-};
-
-bool isCorrectPosition(Ship ship, Board pl)
-{
-    bool is_error = false;
-
-    if (!(ship.x > UPPERLIM || ship.x < LOWERLIM) && !(ship.y > UPPERLIM || ship.y < LOWERLIM))
-    {
-        if (ship.size == 1)
-        {
-            for (int j = ship.x == LOWERLIM + 1 ? ship.x - 1 : ship.x - 2; j < SIZEBOARD && j < ship.x + 1; j++)
-                for (int i = ship.y == UPPERLIM ? ship.y - 1 : ship.y, stepsI = 0; i > 0 && stepsI < ship.size + 2; i--, stepsI++)
-                    if (pl.PlayerBoard[i][j] == 'S')
-                        is_error = true;
-        }
-        else
-        {
-            if (ship.direction == "right")
-            {
-                if (ship.x + ship.size - 1 > UPPERLIM)
-                    is_error = true;
-                if (ship.x == LOWERLIM + 1)
-                    ship.size--;
-                for (int i = ship.y == LOWERLIM + 1 ? ship.y - 1 : ship.y - 2; i < SIZEBOARD && i < ship.y + 1; i++)
-                    for (int j = ship.y == LOWERLIM + 1 ? ship.x - 1 : ship.x - 2, stepsJ = 0; j < SIZEBOARD && stepsJ < ship.size + 2; j++, stepsJ++)
-                        if (pl.PlayerBoard[i][j] == 'S')
-                            is_error = true;
-
-            }
-            else if (ship.direction == "left")
-            {
-                if (ship.x - ship.size < LOWERLIM)
-                    is_error = true;
-                if (ship.x == UPPERLIM)
-                    ship.size--;
-                for (int i = ship.y == LOWERLIM + 1 ? ship.y - 1 : ship.y - 2; i < SIZEBOARD && i < ship.y + 1; i++)
-                    for (int j = ship.x == UPPERLIM ? ship.x - 1 : ship.x, stepsJ = 0; j >= 0 && stepsJ < ship.size + 2; j--, stepsJ++)
-                        if (pl.PlayerBoard[i][j] == 'S')
-                            is_error = true;
-            }
-            else if (ship.direction == "up")
-            {
-                if (ship.y - ship.size < LOWERLIM)
-                    is_error = true;
-                if (ship.y == UPPERLIM)
-                    ship.size--;
-                for (int j = ship.x == LOWERLIM + 1 ? ship.x - 1 : ship.x - 2; j < SIZEBOARD && j < ship.x + 1; j++)
-                    for (int i = ship.y == UPPERLIM ? ship.y - 1 : ship.y, stepsI = 0; i > 0 && stepsI < ship.size + 2; i--, stepsI++)
-                        if (pl.PlayerBoard[i][j] == 'S')
-                            is_error = true;
-            }
-            else if (ship.direction == "down")
-            {
-                if (ship.y + ship.size - 1 > UPPERLIM)
-                    is_error = true;
-                if (ship.y == LOWERLIM + 1)
-                    ship.size--;
-                for (int j = ship.x == LOWERLIM + 1 ? ship.x - 1 : ship.x - 2; j < SIZEBOARD && j < ship.x + 1; j++)
-                    for (int i = ship.y == LOWERLIM + 1 ? ship.y - 1 : ship.y - 2, stepsI = 0; i < SIZEBOARD && stepsI < ship.size + 2; i++, stepsI++)
-                        if (pl.PlayerBoard[i][j] == 'S')
-                            is_error = true;
-            }
-        }
-    }
-    else
-        is_error = true;
-
-    return is_error;
-}
-
-int main()
-{
-    //////////////////////////////////
-    //                              //
-    // «робити масив з клас≥в Ship  //
-    //                              //
-    //////////////////////////////////
-
-    Board pl1, pl2;
-    Ship ship;
-
-    ship.size = 1;
-
-    pl1.printBoard(pl1.PlayerBoard, "Player's 1 board");
-
-    while (true)
-    {
-        ship.setPosition();
-        if (!isCorrectPosition(ship, pl1))
-            break;
-    }
-
-    pl1.PlayerBoard = ship.place(pl1.PlayerBoard);
-
-    pl1.printBoard(pl1.PlayerBoard, "Player's 1 board");
-
-    return 0;
-}*/
