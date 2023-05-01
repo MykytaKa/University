@@ -17,6 +17,8 @@ public:
 
 private:
     Ui::Player1Window *ui;
+    QPushButton*** MyButtons = new QPushButton**[10];
+    QPushButton*** EnemyButtons = new QPushButton**[10];
 };
 
 #endif // PLAYER1WINDOW_H

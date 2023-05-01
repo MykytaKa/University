@@ -2,6 +2,8 @@
 #define STARTWINDOW_H
 
 #include <QMainWindow>
+#include <player1window.h>
+#include <player2window.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class StartWindow; }
@@ -14,6 +16,9 @@ class StartWindow : public QMainWindow
 public:
     StartWindow(QWidget *parent = nullptr);
     ~StartWindow();
+
+private slots:
+    void on_pushButton_clicked();
 
 private:
     Ui::StartWindow *ui;
