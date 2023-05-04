@@ -300,9 +300,9 @@ public:
         swap(player1Ships, player2Ships);
     }
 
-    void cirleShips() //////////// problem ///////////////
+    void cirleShips()
     {
-        for (int k = 0; k < SHIPSAMOUNT; k++)
+        for (int k = 0; k < 2; k++)
         {
             if (ShipDestroyed(player2Board, player2Ships[k]))
             {
@@ -311,9 +311,10 @@ public:
                 {
                     for (int j = player2Ships[k].getX() == LOWERLIM + 1 ? player2Ships[k].getX() - 1 : player2Ships[k].getX() - 2; j < SIZEBOARD && j < player2Ships[k].getX() + 1; j++)
                         for (int i = player2Ships[k].getY() == UPPERLIM ? player2Ships[k].getY() - 1 : player2Ships[k].getY(), stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
-                            if (player2Board[i][j] == '-')
+                            if (player2Board[i][j] == UNKNOWNCELL)
                             {
-                                player2Board[i][j] = 'O';
+                                player2Board[i][j] = EMPTY;
+                                player2HideBoard[i][j] = EMPTY;
                             }
                 }
                 else
@@ -324,9 +325,10 @@ public:
                             ship_s--;
                         for (int i = player2Ships[k].getY() == LOWERLIM + 1 ? player2Ships[k].getY() - 1 : player2Ships[k].getY() - 2; i < SIZEBOARD && i < player2Ships[k].getY() + 1; i++)
                             for (int j = player2Ships[k].getX() == LOWERLIM + 1 ? player2Ships[k].getX() - 1 : player2Ships[k].getX() - 2, stepsJ = 0; j < SIZEBOARD && stepsJ < ship_s + 2; j++, stepsJ++)
-                                if (player2Board[i][j] == '-')
+                                if (player2Board[i][j] == UNKNOWNCELL)
                                 {
-                                    player2Board[i][j] = 'O';
+                                    player2Board[i][j] = EMPTY;
+                                    player2HideBoard[i][j] = EMPTY;
                                 }
                     }
                     else if (player2Ships[k].getDirection() == LEFT)
@@ -335,9 +337,10 @@ public:
                             ship_s--;
                         for (int i = player2Ships[k].getY() == LOWERLIM + 1 ? player2Ships[k].getY() - 1 : player2Ships[k].getY() - 2; i < SIZEBOARD && i < player2Ships[k].getY() + 1; i++)
                             for (int j = player2Ships[k].getX() == UPPERLIM ? player2Ships[k].getX() - 1 : player2Ships[k].getX(), stepsJ = 0; j >= 0 && stepsJ < ship_s + 2; j--, stepsJ++)
-                                if (player2Board[i][j] == '-')
+                                if (player2Board[i][j] == UNKNOWNCELL)
                                 {
-                                    player2Board[i][j] = 'O';
+                                    player2Board[i][j] = EMPTY;
+                                    player2HideBoard[i][j] = EMPTY;
                                 }
                     }
                     else if (player2Ships[k].getDirection() == UP)
@@ -346,9 +349,10 @@ public:
                             ship_s--;
                         for (int j = player2Ships[k].getX() == LOWERLIM + 1 ? player2Ships[k].getX() - 1 : player2Ships[k].getX() - 2; j < SIZEBOARD && j < player2Ships[k].getX() + 1; j++)
                             for (int i = player2Ships[k].getY() == UPPERLIM ? player2Ships[k].getY() - 1 : player2Ships[k].getY(), stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
-                                if (player2Board[i][j] == '-')
+                                if (player2Board[i][j] == UNKNOWNCELL)
                                 {
-                                    player2Board[i][j] = 'O';
+                                    player2Board[i][j] = EMPTY;
+                                    player2HideBoard[i][j] = EMPTY;
                                 }
                                     
                     }
@@ -358,9 +362,10 @@ public:
                             ship_s--;
                         for (int j = player2Ships[k].getX() == LOWERLIM + 1 ? player2Ships[k].getX() - 1 : player2Ships[k].getX() - 2; j < SIZEBOARD && j < player2Ships[k].getX() + 1; j++)
                             for (int i = player2Ships[k].getY() == LOWERLIM + 1 ? player2Ships[k].getY() - 1 : player2Ships[k].getY() - 2, stepsI = 0; i < SIZEBOARD && stepsI < ship_s + 2; i++, stepsI++)
-                                if (player2Board[i][j] == '-')
+                                if (player2Board[i][j] == UNKNOWNCELL)
                                 {
-                                    player2Board[i][j] = 'O';
+                                    player2Board[i][j] = EMPTY;
+                                    player2HideBoard[i][j] = EMPTY;
                                 }
                     }
                 } 
@@ -491,7 +496,7 @@ int main()
     {
         Game.printBoard(Game.getPlayer2HideBoard(), label);
         Game.shoot(text);
-        //Game.cirleShips();
+        Game.cirleShips();
         system("cls");
         if (!Game.getIsPlayerHit()) 
         {
