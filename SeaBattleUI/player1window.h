@@ -2,6 +2,7 @@
 #define PLAYER1WINDOW_H
 
 #include <QDialog>
+#include "cell.h"
 
 namespace Ui {
 class Player1Window;
@@ -15,10 +16,14 @@ public:
     explicit Player1Window(QWidget *parent = nullptr);
     ~Player1Window();
 
+private slots:
+    void on_pushButton_11_clicked();
+    void hideCell();
+
 private:
     Ui::Player1Window *ui;
-    QPushButton*** MyButtons = new QPushButton**[10];
-    QPushButton*** EnemyButtons = new QPushButton**[10];
+    Cell*** MyButtons = new Cell**[10];
+    Cell*** EnemyButtons = new Cell**[10];
 };
 
 #endif // PLAYER1WINDOW_H

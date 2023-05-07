@@ -2,6 +2,7 @@
 #define PLAYER2WINDOW_H
 
 #include <QDialog>
+#include "cell.h"
 
 namespace Ui {
 class Player2Window;
@@ -17,6 +18,8 @@ public:
 
 private:
     Ui::Player2Window *ui;
+    Cell*** MyButtons = new Cell**[10];
+    Cell*** EnemyButtons = new Cell**[10];
 };
 
 #endif // PLAYER2WINDOW_H
