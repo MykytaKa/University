@@ -1,5 +1,6 @@
 #include <iostream>
 #include <windows.h>
+#include <limits>
 
 using namespace std;
 
@@ -16,140 +17,16 @@ const string RIGHT = "right";
 const string LEFT = "left";
 const string UP = "up";
 const string DOWN = "down";
-const string Directions[] = { RIGHT, LEFT, UP, DOWN };
+const string DIRECTIONS[] = { RIGHT, LEFT, UP, DOWN };
 
-char** createBoard()
-{
-    char** board;
-    board = new char* [SIZEBOARD];
-    for (int i = 0; i < SIZEBOARD; i++)
-    {
-        board[i] = new char[SIZEBOARD];
-        for (int j = 0; j < SIZEBOARD; j++)
-            board[i][j] = UNKNOWNCELL;
-    }
-
-    return board;
-}
-
-void deleteBoard(char** board)
-{
-    for (int i = 0; i < SIZEBOARD; i++)
-        delete[] board[i];
-    delete[] board;
-}
-
-bool error(int X, int Y, string direction, char** player, int ship_s)
-{
-    bool is_error = false;
-
-    if (!(X > UPPERLIM || X < LOWERLIM) && !(Y > UPPERLIM || Y < LOWERLIM))
-    {
-        if (ship_s == 1)
-        {
-            for (int j = X == LOWERLIM + 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
-                for (int i = Y == UPPERLIM ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
-                    if (player[i][j] == SHIP)
-                        is_error = true;
-        }
-        else
-        {
-            if (direction == RIGHT)
-            {
-                if (X + ship_s - 1 > UPPERLIM)
-                    is_error = true;
-                if (X == LOWERLIM + 1)
-                    ship_s--;
-                for (int i = Y == LOWERLIM + 1 ? Y - 1 : Y - 2; i < SIZEBOARD && i < Y + 1; i++)
-                    for (int j = X == LOWERLIM + 1 ? X - 1 : X - 2, stepsJ = 0; j < SIZEBOARD && stepsJ < ship_s + 2; j++, stepsJ++)
-                        if (player[i][j] == SHIP)
-                            is_error = true;
-            }
-            else if (direction == LEFT)
-            {
-                if (X - ship_s < LOWERLIM)
-                    is_error = true;
-                if (X == UPPERLIM)
-                    ship_s--;
-                for (int i = Y == LOWERLIM + 1 ? Y - 1 : Y - 2; i < SIZEBOARD && i < Y + 1; i++)
-                    for (int j = X == UPPERLIM ? X - 1 : X, stepsJ = 0; j >= 0 && stepsJ < ship_s + 2; j--, stepsJ++)
-                        if (player[i][j] == SHIP)
-                            is_error = true;
-            }
-            else if (direction == UP)
-            {
-                if (Y - ship_s < LOWERLIM)
-                    is_error = true;
-                if (Y == UPPERLIM)
-                    ship_s--;
-                for (int j = X == LOWERLIM + 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
-                    for (int i = Y == UPPERLIM ? Y - 1 : Y, stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
-                        if (player[i][j] == SHIP)
-                            is_error = true;
-            }
-            else if (direction == DOWN)
-            {
-                if (Y + ship_s - 1 > UPPERLIM)
-                    is_error = true;
-                if (Y == LOWERLIM + 1)
-                    ship_s--;
-                for (int j = X == LOWERLIM + 1 ? X - 1 : X - 2; j < SIZEBOARD && j < X + 1; j++)
-                    for (int i = Y == LOWERLIM + 1 ? Y - 1 : Y - 2, stepsI = 0; i < SIZEBOARD && stepsI < ship_s + 2; i++, stepsI++)
-                        if (player[i][j] == SHIP)
-                            is_error = true;
-            }
-        }
-    }
-    else
-        is_error = true;
-
-    return is_error;
-}
-
-char** placeShip(int x, int y, string direction, char** player, int shipSize)
-{
-    int magnifier = direction == RIGHT || direction == DOWN ? magnifier = 1 : magnifier = -1;
-    if (direction == LEFT || direction == RIGHT)
-    {
-        for (int i = y - 1, j = x - 1, steps = 0; steps < shipSize; j += magnifier)
-        {
-            player[i][j] = SHIP;
-            steps++;
-        }
-    }
-    else
-    {
-        for (int i = y - 1, j = x - 1, steps = 0; steps < shipSize; i += magnifier)
-        {
-            player[i][j] = SHIP;
-            steps++;
-        }
-    }
-
-    return player;
-}
-
-bool isCorrectDirection(string direction)
-{
-    for (int i = 0; i < 4; i++)
-        if (direction == Directions[i])
-            return false;
-    return true;
-}
-
-void getShipParameter(string tetxPosition, string textSeparator, int shipSize)
-{
-    cout << "Enter the" << tetxPosition << "to place a " << shipSize << " - deck ship" << textSeparator << endl;
-}
-
-class ship
+class Ship
 {
     int x, y, size;
     string direction;
 public:
     void setSize(int Size)
     {
-        size = Size; 
+        size = Size;
     }
     int getSize()
     {
@@ -167,118 +44,266 @@ public:
     {
         return direction;
     }
-    char** setXYDirection(char** board)
+
+    void setXYDirection()
     {
-        while (true)
+        bool valid = false;
+        while(!valid)
         {
-            getShipParameter(" vertical coordinate ", ":", size);
+            cout << "Enter the vertical coordinate to place a " << size << " - deck ship:" << endl;
             cin >> y;
-
-            getShipParameter(" horizontal coordinate ", ":", size);
-            cin >> x;
-
-            while (true && size != 1)
+            if (cin.fail())
             {
-                getShipParameter(" direction ", ":(up,down,left,right)", size);
-                cin >> direction;
+                cout << "Invalid value" << endl;
 
-                if (!isCorrectDirection(direction))
-                    break;
-                else
-                    cout << "ERROR" << endl;
+                cin.clear();
+                cin.ignore(INT_MAX, '\n');
             }
-
-            if (error(x, y, direction, board, size))
-                cout << "ERRROOR" << endl;
             else
-                break;
-        }
-        board = placeShip(x, y, direction, board, size);
-
-        return board;
-    }
-};
-
-void fillShips(ship*& ships, int& index, int shipsAmount, int size)
-{
-    for (int i = index, counter = 0; counter < shipsAmount; i++, counter++)
-    {
-        ship Ship;
-        Ship.setSize(size);
-        ships[i] = Ship;
-        index++;
-    }
-}
-
-ship* createShips()
-{
-    int index = 0;
-    ship* ships = new ship[SHIPSAMOUNT];
-    fillShips(ships, index, 1, 5);
-    fillShips(ships, index, 2, 3);
-    fillShips(ships, index, 3, 2);
-    fillShips(ships, index, 4, 1);
-    return ships;
-}
-
-void deleteShips(ship* Ship)
-{
-    delete[] Ship;
-}
-
-bool playerLose(char** board)
-{
-    for (int i = 0; i < SIZEBOARD; i++)
-        for (int j = 0; j < SIZEBOARD; j++)
-            if (board[i][j] == SHIP)
-                return false;
-    return true;
-}
-
-bool ShipDestroyed(char** player2Board, ship Ship)
-{
-    if (Ship.getSize() == 1)
-    {
-        if (player2Board[Ship.getY() - 1][Ship.getX() - 1] == SHIP)
-            return false;
-        return true;
-    }
-    else
-    {
-        int magnifier = Ship.getDirection() == RIGHT || Ship.getDirection() == DOWN ? magnifier = 1 : magnifier = -1;
-        if (Ship.getDirection() == LEFT || Ship.getDirection() == RIGHT)
-        {
-            for (int i = Ship.getY() - 1, j = Ship.getX() - 1, steps = 0; steps < Ship.getSize(); j += magnifier)
             {
-                if (player2Board[i][j] == SHIP)
-                    return false;
-                steps++;
+                valid = true;
             }
-            return true;
+        }
+
+        valid = false;
+
+        while(!valid)
+        {
+            cout << "Enter the horizontal coordinate to place a " << size << " - deck ship:" << endl;
+            cin >> x;
+            if (cin.fail())
+            {
+                cout << "Invalid value" << endl;
+
+                cin.clear();
+                cin.ignore(INT_MAX, '\n');
+            }
+            else
+            {
+                valid = true;
+            }
+        }
+
+        if(size != 1)
+        {
+            cout << "Enter the direction to place a " << size << " - deck ship:(up,down,left,right)" << endl;
+            cin >> direction;
+        }
+    }
+
+    bool isShipDestroyed(char** player2Board)
+    {
+        if (size == 1)
+        {
+            if (player2Board[y - 1][x - 1] == SHIP)
+                return false;
+            else
+                return true;
         }
         else
         {
-            for (int i = Ship.getY() - 1, j = Ship.getX() - 1, steps = 0; steps < Ship.getSize(); i += magnifier)
+            int magnifier = (direction == RIGHT) || (direction == DOWN) ? magnifier = 1 : magnifier = -1;
+            if (direction == LEFT || direction == RIGHT)
             {
-                if (player2Board[i][j] == SHIP)
-                    return false;
-                steps++;
+                for (int i = y - 1, j = x - 1, steps = 0; steps < size; j += magnifier)
+                {
+                    if (player2Board[i][j] == SHIP)
+                        return false;
+                    steps++;
+                }
+                return true;
             }
-            return true;
+            else
+            {
+                for (int i = y - 1, j = x - 1, steps = 0; steps < size; i += magnifier)
+                {
+                    if (player2Board[i][j] == SHIP)
+                        return false;
+                    steps++;
+                }
+                return true;
+            }
         }
     }
-}
+};
 
-class game
+class ResourceHandler
+{
+public:
+    char** createBoard()
+    {
+        char** board;
+        board = new char* [SIZEBOARD];
+        for (int i = 0; i < SIZEBOARD; i++)
+        {
+            board[i] = new char[SIZEBOARD];
+            for (int j = 0; j < SIZEBOARD; j++)
+                board[i][j] = UNKNOWNCELL;
+        }
+        return board;
+    }
+
+    static void deleteBoard(char** board)
+    {
+        for (int i = 0; i < SIZEBOARD; i++)
+            delete[] board[i];
+        delete[] board;
+    }
+
+    Ship* createShips() 
+    {
+        int index = 0;
+        Ship* ships = new Ship[SHIPSAMOUNT];
+        fillShips(ships, index, 1, 5);
+        fillShips(ships, index, 2, 3);
+        fillShips(ships, index, 3, 2);
+        fillShips(ships, index, 4, 1);
+        return ships;
+    }
+
+    void fillShips(Ship*& ships, int& index, int shipsAmount, int size)
+    {
+        for (int i = index, counter = 0; counter < shipsAmount; i++, counter++)
+        {
+            Ship ship;
+            ship.setSize(size);
+            ships[i] = ship;
+            index++;
+        }
+    }
+
+    void deleteShips(Ship* ships)
+    {
+        delete[] ships;
+    }
+};
+
+class ValueChecker
+{
+public:
+    bool IsValidPosition1DeskShip(Ship ship, char** player)
+    {
+        for (int j = ship.getX() == LOWERLIM + 1 ? ship.getX() - 1 : ship.getX() - 2; j < SIZEBOARD && j < ship.getX() + 1; j++)
+            for (int i = ship.getY() == UPPERLIM ? ship.getY() - 1 : ship.getY(), stepsI = 0; i > 0 && stepsI < ship.getSize() + 2; i--, stepsI++)
+                if (player[i][j] == SHIP)
+                    return true;
+        return false;
+    }
+
+    bool IsValidPositionRight(Ship ship, char** player)
+    {
+        int ship_s = ship.getSize();
+        if (ship.getX() + ship_s - 1 > UPPERLIM)
+            return true;
+        if (ship.getX() == LOWERLIM + 1)
+            ship_s--;
+        for (int i = ship.getY() == LOWERLIM + 1 ? ship.getY() - 1 : ship.getY() - 2; i < SIZEBOARD && i < ship.getY() + 1; i++)
+            for (int j = ship.getX() == LOWERLIM + 1 ? ship.getX() - 1 : ship.getX() - 2, stepsJ = 0; j < SIZEBOARD && stepsJ < ship_s + 2; j++, stepsJ++)
+                if (player[i][j] == SHIP)
+                    return true;
+        return false;
+    }
+
+    bool IsValidPositionLeft(Ship ship, char** player)
+    {
+        int ship_s = ship.getSize();
+        if (ship.getX() - ship_s < LOWERLIM)
+            return true;
+        if (ship.getX() == UPPERLIM)
+            ship_s--;
+        for (int i = ship.getY() == LOWERLIM + 1 ? ship.getY() - 1 : ship.getY() - 2; i < SIZEBOARD && i < ship.getY() + 1; i++)
+            for (int j = ship.getX() == UPPERLIM ? ship.getX() - 1 : ship.getX(), stepsJ = 0; j >= 0 && stepsJ < ship_s + 2; j--, stepsJ++)
+                if (player[i][j] == SHIP)
+                    return true;
+        return false;
+    }
+
+    bool IsValidPositionUp(Ship ship, char** player)
+    {
+        int ship_s = ship.getSize();
+        if (ship.getY() - ship_s < LOWERLIM)
+            return true;
+        if (ship.getY() == UPPERLIM)
+            ship_s--;
+        for (int j = ship.getX() == LOWERLIM + 1 ? ship.getX() - 1 : ship.getX() - 2; j < SIZEBOARD && j < ship.getX() + 1; j++)
+            for (int i = ship.getY() == UPPERLIM ? ship.getY() - 1 : ship.getY(), stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
+                if (player[i][j] == SHIP)
+                    return true;
+        return false;
+    }
+
+    bool IsValidPositionDown(Ship ship, char** player)
+    {
+        int ship_s = ship.getSize();
+        if (ship.getY() + ship_s - 1 > UPPERLIM)
+            return true;
+        if (ship.getY() == LOWERLIM + 1)
+            ship_s--;
+        for (int j = ship.getX() == LOWERLIM + 1 ? ship.getX() - 1 : ship.getX() - 2; j < SIZEBOARD && j < ship.getX() + 1; j++)
+            for (int i = ship.getY() == LOWERLIM + 1 ? ship.getY() - 1 : ship.getY() - 2, stepsI = 0; i < SIZEBOARD && stepsI < ship_s + 2; i++, stepsI++)
+                if (player[i][j] == SHIP)
+                    return true;
+        return false;
+    }
+
+    bool IsValidPosition(Ship ship, char** player)
+    {
+        bool is_error = false;
+
+        if (!(ship.getX() > UPPERLIM || ship.getX() < LOWERLIM) && !(ship.getY() > UPPERLIM || ship.getY() < LOWERLIM))
+        {
+            if (ship.getSize() == 1)
+            {
+                is_error = IsValidPosition1DeskShip(ship, player); 
+            }
+            else
+            {
+                if (ship.getDirection() == RIGHT)
+                {
+                    is_error = IsValidPositionRight(ship, player);
+                }
+                else if (ship.getDirection() == LEFT)
+                {
+                    is_error = IsValidPositionLeft(ship, player);
+                }
+                else if (ship.getDirection() == UP)
+                {
+                    is_error = IsValidPositionUp(ship, player);
+                }
+                else if (ship.getDirection() == DOWN)
+                {
+                    is_error = IsValidPositionDown(ship, player);
+                }
+            }
+        }
+        else
+            is_error = true;
+
+        return is_error;
+    }
+
+    bool isValidDirection(string direction)
+    {
+        for (int i = 0; i < 4; i++)
+            if (direction == DIRECTIONS[i])
+                return true;
+        return false;
+    }
+};
+
+class Boards 
 {
 private:
     char** player1Board;
     char** player2Board;
     char** player1HideBoard;
     char** player2HideBoard;
-    ship* player1Ships;
-    ship* player2Ships;
+    Ship* player1Ships; 
+    Ship* player2Ships; 
     bool isPlayerHit;
+    string playerHandlerLabel = "Player 1";
+    string playerInfoLabel = "PLAYER'S 2 BOARD";
+    friend class Game;
 public:
     char** getPlayer2HideBoard()
     {
@@ -292,25 +317,140 @@ public:
     {
         return player2Board;
     }
-
-    void makeTurn()
+    string getPlayerHandlerLabel()
     {
-        swap(player1Board, player2Board);
-        swap(player1HideBoard, player2HideBoard);
-        swap(player1Ships, player2Ships);
+        return playerHandlerLabel;
+    }
+    string getPlayerInfoLabel()
+    {
+        return playerInfoLabel;
     }
 
-    void cirleShips()
+    char** placeShip(Ship ship, char** player)
     {
-        for (int k = 0; k < 2; k++)
+        if(ship.getSize() == 1)
+            player[ship.getY() - 1][ship.getX() - 1] = SHIP;
+        else
         {
-            if (ShipDestroyed(player2Board, player2Ships[k]))
+            int magnifier = ship.getDirection() == RIGHT || ship.getDirection() == DOWN ? magnifier = 1 : magnifier = -1;
+
+            if (ship.getDirection() == LEFT || ship.getDirection() == RIGHT)
+            {
+                for (int i = ship.getY() - 1, j = ship.getX() - 1, steps = 0; steps < ship.getSize(); j += magnifier)
+                {
+                    player[i][j] = SHIP;
+                    steps++;
+                }
+            }
+            else
+            {
+                for (int i = ship.getY() - 1, j = ship.getX() - 1, steps = 0; steps < ship.getSize(); i += magnifier)
+                {
+                    player[i][j] = SHIP;
+                    steps++;
+                }
+            }
+        }
+        return player;
+    }
+
+    void setPlayer1Ships()
+    {
+        ValueChecker error;
+        for (int i = 0; i < SHIPSAMOUNT; i++)
+        {
+            printBoard(player1Board, "PLAYER'S 1 BOARD");
+            while(true)
+            {
+                player1Ships[i].setXYDirection();
+                if (player1Ships[i].getSize() == 1)
+                {
+                    if (error.IsValidPosition(player1Ships[i], player1Board))
+                        cout << "ERROR" << endl;
+                    else
+                        break;
+                }
+                else
+                {
+                    if(!error.isValidDirection(player1Ships[i].getDirection()))
+                        cout << "ERROR" << endl;
+                    else
+                        if (error.IsValidPosition(player1Ships[i], player1Board))
+                            cout << "ERROR" << endl;
+                        else
+                            break;
+                }
+            }
+            player1Board = placeShip(player1Ships[i], player1Board);
+            system("cls");
+        }
+    }
+
+    void setPlayer2Ships()
+    {
+        ValueChecker error;
+        for (int i = 0; i < SHIPSAMOUNT; i++)
+        {
+            printBoard(player2Board, "PLAYER'S 2 BOARD");
+            while (true)
+            {
+                player2Ships[i].setXYDirection();
+                if (player2Ships[i].getSize() == 1)
+                {
+                    if (error.IsValidPosition(player2Ships[i], player2Board))
+                        cout << "ERROR" << endl;
+                    else
+                        break;
+                }
+                else
+                {
+                    if (!error.isValidDirection(player2Ships[i].getDirection()))
+                        cout << "ERROR" << endl;
+                    else
+                        if (error.IsValidPosition(player2Ships[i], player2Board))
+                            cout << "ERROR" << endl;
+                        else
+                            break;
+                }
+            }
+            player2Board = placeShip(player2Ships[i], player2Board);
+            system("cls");
+        }
+    }
+
+    void printBoard(char** board, string text)
+    {
+        cout << text << endl << endl << "    ";
+
+        for (int i = 0; i < SIZEBOARD; i++)
+            cout << i + 1 << "  ";
+
+        cout << endl;
+
+        for (int i = 0; i < SIZEBOARD; i++)
+        {
+            if (i < SIZEBOARD - 1)
+                cout << " ";
+            cout << i + 1 << "  ";
+            for (int j = 0; j < SIZEBOARD; j++)
+                cout << board[i][j] << "  ";
+            cout << endl;
+        }
+
+        cout << endl;
+    }
+
+    void circleShips()
+    {
+        for (int k = 0; k < SHIPSAMOUNT; k++)
+        {
+            if (player2Ships[k].isShipDestroyed(player2Board))
             {
                 int ship_s = player2Ships[k].getSize();
                 if (player2Ships[k].getSize() == 1)
                 {
                     for (int j = player2Ships[k].getX() == LOWERLIM + 1 ? player2Ships[k].getX() - 1 : player2Ships[k].getX() - 2; j < SIZEBOARD && j < player2Ships[k].getX() + 1; j++)
-                        for (int i = player2Ships[k].getY() == UPPERLIM ? player2Ships[k].getY() - 1 : player2Ships[k].getY(), stepsI = 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
+                        for (int i = player2Ships[k].getY() == UPPERLIM ? player2Ships[k].getY() - 1 : player2Ships[k].getY(), stepsI = player2Ships[k].getY() == UPPERLIM ? 1 : 0; i > 0 && stepsI < ship_s + 2; i--, stepsI++)
                             if (player2Board[i][j] == UNKNOWNCELL)
                             {
                                 player2Board[i][j] = EMPTY;
@@ -354,7 +494,7 @@ public:
                                     player2Board[i][j] = EMPTY;
                                     player2HideBoard[i][j] = EMPTY;
                                 }
-                                    
+
                     }
                     else if (player2Ships[k].getDirection() == DOWN)
                     {
@@ -368,18 +508,50 @@ public:
                                     player2HideBoard[i][j] = EMPTY;
                                 }
                     }
-                } 
+                }
             }
         }
     }
 
-    void shoot(string text)
+    Boards()
+    {
+        ResourceHandler creator;
+        player1Board = creator.createBoard();
+        player2Board = creator.createBoard();
+        player1HideBoard = creator.createBoard();
+        player2HideBoard = creator.createBoard();
+        player1Ships = creator.createShips();
+        player2Ships = creator.createShips();
+    }
+
+    ~Boards()
+    {
+        ResourceHandler deletor;
+        deletor.deleteBoard(player1Board);
+        deletor.deleteBoard(player2Board);
+        deletor.deleteBoard(player1HideBoard);
+        deletor.deleteBoard(player2HideBoard);
+        deletor.deleteShips(player1Ships);
+        deletor.deleteShips(player2Ships);
+    }
+};
+
+class Game
+{
+    bool isPlayerHit;
+public:
+    void shoot(string text, Boards& players)
     {
         int x, y;
         while (true)
         {
-            cout << text << ", enter the vertical coordinate for the shot:" << endl;
-            cin >> y;
+            while (true)
+            {
+                cout << text << ", enter the vertical coordinate for the shot:" << endl;
+                cin >> y;
+                if (!cin.fail())
+                    break;
+            }
 
             cout << text << ", enter the horizontal coordinate for the shot:" << endl;
             cin >> x;
@@ -390,22 +562,22 @@ public:
                 cout << "ERROR";
         }
 
-        if (player2Board[y - 1][x - 1] == SHIP)
+        if (players.player2Board[y - 1][x - 1] == SHIP)
         {
-            player2HideBoard[y - 1][x - 1] = DESTROYEDSHIP;
-            player2Board[y - 1][x - 1] = DESTROYEDSHIP;
+            players.player2HideBoard[y - 1][x - 1] = DESTROYEDSHIP;
+            players.player2Board[y - 1][x - 1] = DESTROYEDSHIP;
             isPlayerHit = true;
         }
-        else if (player2Board[y - 1][x - 1] == DESTROYEDSHIP)
+        else if (players.player2Board[y - 1][x - 1] == DESTROYEDSHIP)
         {
-            player2HideBoard[y - 1][x - 1] = DESTROYEDSHIP;
-            player2Board[y - 1][x - 1] = DESTROYEDSHIP;
-            isPlayerHit = true;
+            players.player2HideBoard[y - 1][x - 1] = DESTROYEDSHIP;
+            players.player2Board[y - 1][x - 1] = DESTROYEDSHIP;
+            players.isPlayerHit = true;
         }
         else
         {
-            player2HideBoard[y - 1][x - 1] = EMPTY;
-            player2Board[y - 1][x - 1] = EMPTY;
+            players.player2HideBoard[y - 1][x - 1] = EMPTY;
+            players.player2Board[y - 1][x - 1] = EMPTY;
             isPlayerHit = false;
         }
     }
@@ -415,112 +587,65 @@ public:
         return isPlayerHit;
     }
 
-    bool gameOver()
+    void makeTurn(Boards& players)
     {
-        return playerLose(player1Board) || playerLose(player2Board);
-    }
-
-    void setPlayer1Ships()
-    {
-        for (int i = 0; i < SHIPSAMOUNT; i++)
+        swap(players.player1Board, players.player2Board);
+        swap(players.player1HideBoard, players.player2HideBoard);
+        swap(players.player1Ships, players.player2Ships);
+        if (players.playerHandlerLabel == "Player 1")
         {
-            printBoard(player1Board, "PLAYER'S 1 BOARD");
-            player1Ships[i].setXYDirection(player1Board);
-            system("cls");
+            players.playerInfoLabel = "PLAYER'S 1 BOARD";
+            players.playerHandlerLabel = "Player 2";
+        }
+        else
+        {
+            players.playerInfoLabel = "PLAYER'S 2 BOARD";
+            players.playerHandlerLabel = "Player 1";
         }
     }
 
-    void setPlayer2Ships()
+    bool isPlayerLose(char** board)
     {
-        for (int i = 0; i < SHIPSAMOUNT; i++)
-        {
-            printBoard(player2Board, "PLAYER'S 2 BOARD");
-            player2Ships[i].setXYDirection(player2Board);
-            system("cls");
-        }
-    }
-
-    void printBoard(char** board, string text)
-    {
-        cout << text << endl << endl << "    ";
-
         for (int i = 0; i < SIZEBOARD; i++)
-            cout << i + 1 << "  ";
-
-        cout << endl;
-
-        for (int i = 0; i < SIZEBOARD; i++)
-        {
-            if (i < SIZEBOARD - 1)
-                cout << " ";
-            cout << i + 1 << "  ";
             for (int j = 0; j < SIZEBOARD; j++)
-                cout << board[i][j] << "  ";
-            cout << endl;
-        }
-
-        cout << endl;
+                if (board[i][j] == SHIP)
+                    return false;
+        return true;
     }
 
-    game()
+    bool gameOver(Boards& players)
     {
-        player1Board = createBoard();
-        player2Board = createBoard();
-        player1HideBoard = createBoard();
-        player2HideBoard = createBoard();
-        player1Ships = createShips();
-        player2Ships = createShips();
+        return isPlayerLose(players.player1Board) || isPlayerLose(players.player2Board);
     }
-
-    ~game()
-    {
-        deleteBoard(player1Board);
-        deleteBoard(player2Board);
-        deleteBoard(player1HideBoard);
-        deleteBoard(player2HideBoard);
-        deleteShips(player1Ships);
-        deleteShips(player2Ships);
-    }
-}; 
+};
 
 int main()
 {
-    game Game;
-    string text = "Player 1";
-    string label = "PLAYER'S 2 BOARD";
+    Game SeaBattle;
+    Boards Players;
 
-    Game.setPlayer1Ships();
-    Game.setPlayer2Ships();
+    Players.setPlayer1Ships();
+    Players.setPlayer2Ships();
 
-    while (!Game.gameOver()) 
+    while (!SeaBattle.gameOver(Players))
     {
-        Game.printBoard(Game.getPlayer2HideBoard(), label);
-        Game.shoot(text);
-        Game.cirleShips();
+        Players.printBoard(Players.getPlayer2HideBoard(), Players.getPlayerInfoLabel());
+        SeaBattle.shoot(Players.getPlayerHandlerLabel(), Players);
+        Players.circleShips();
         system("cls");
-        if (!Game.getIsPlayerHit()) 
+        if (!SeaBattle.getIsPlayerHit())
         {
-            Game.printBoard(Game.getPlayer2HideBoard(), label);
-            cout << "YOU MISS" << endl;
+            Players.printBoard(Players.getPlayer2HideBoard(), Players.getPlayerInfoLabel());
+            cout << "YOU MISS";
             Sleep(2000);
-            Game.makeTurn();
-            if (text == "Player 1")
-            {
-                label = "PLAYER'S 1 BOARD";
-                text = "Player 2";
-            }
-            else
-            {
-                label = "PLAYER'S 2 BOARD";
-                text = "Player 1";
-            }
+            SeaBattle.makeTurn(Players);
             system("cls");
         }
     }
 
-    Game.printBoard(Game.getPlayer1Board(), "WINNER");
+    Players.printBoard(Players.getPlayer1Board(), "WINNER");
     cout << endl;
-    Game.printBoard(Game.getPlayer2Board(), "LOSER");
+    Players.printBoard(Players.getPlayer2Board(), "LOSER");
 
     return 0;
 }
