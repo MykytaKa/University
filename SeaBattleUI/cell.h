@@ -6,10 +6,11 @@
 class Cell : public QPushButton
 {
 private:
-    bool IsContainShip = false;
+    bool isSet = false;
 public:
     Cell();
-
+    bool getIsSet();
+    void set();
 };
 
 #endif // CELL_H

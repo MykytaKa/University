@@ -11,12 +11,10 @@ StartWindow::StartWindow(QWidget *parent)
 void StartWindow::on_pushButton_clicked()
 {
     hide();
-    player1 = new Player1Window(this);
-    player2 = new Player2Window(this);
-    player1->setWindowTitle("Player 1");
-    player2->setWindowTitle("Player 2");
-    player1->show();
-    player2->show();
+    game = new PlayerWindow(this);
+    game->setWindowTitle("Sea Battle");
+    game->fillBoard();
+    game->show();
 }
 
 StartWindow::~StartWindow()

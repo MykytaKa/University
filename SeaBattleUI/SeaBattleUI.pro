@@ -11,19 +11,18 @@ CONFIG += c++17
 SOURCES += \
     cell.cpp \
     main.cpp \
-    player1window.cpp \
-    player2window.cpp \
+    playerwindow.cpp \
+    ship.cpp \
     startwindow.cpp
 
 HEADERS += \
     cell.h \
-    player1window.h \
-    player2window.h \
+    playerwindow.h \
+    ship.h \
     startwindow.h
 
 FORMS += \
-    player1window.ui \
-    player2window.ui \
+    playerwindow.ui \
     startwindow.ui
 
 # Default rules for deployment.

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Player1Window</class>
- <widget class="QDialog" name="Player1Window">
+ <class>PlayerWindow</class>
+ <widget class="QDialog" name="PlayerWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -25,7 +25,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QLabel" name="label_2">
+  <widget class="QLabel" name="YourBoardLabel">
    <property name="geometry">
     <rect>
      <x>140</x>
@@ -43,7 +43,7 @@
     <string>Your board</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_5">
+  <widget class="QLabel" name="EnemyBoardLabel">
    <property name="geometry">
     <rect>
      <x>480</x>
@@ -64,10 +64,10 @@
     <enum>Qt::AutoText</enum>
    </property>
   </widget>
-  <widget class="QPushButton" name="ShootButtonPl_1">
+  <widget class="QPushButton" name="ShootButton">
    <property name="geometry">
     <rect>
-     <x>590</x>
+     <x>300</x>
      <y>330</y>
      <width>121</width>
      <height>81</height>
@@ -91,7 +91,7 @@
     <string>Shoot</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>20</x>
@@ -179,10 +179,10 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>90</x>
      <y>330</y>
      <width>541</width>
      <height>81</height>
@@ -190,7 +190,7 @@
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="placeShipLabel">
       <property name="font">
        <font>
         <family>Terminal</family>
@@ -205,7 +205,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QLabel" name="label_3">
+       <widget class="QLabel" name="shipsLeft">
         <property name="maximumSize">
          <size>
           <width>16777215</width>
@@ -227,12 +227,18 @@
         <property name="text">
          <string>5</string>
         </property>
+        <property name="scaledContents">
+         <bool>false</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
        </widget>
       </item>
      </layout>
     </item>
     <item>
-     <widget class="QPushButton" name="pushButton_11">
+     <widget class="QPushButton" name="placeShipButton">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -264,7 +270,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>380</x>
