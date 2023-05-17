@@ -2,6 +2,7 @@
 #define STARTWINDOW_H
 
 #include <QMainWindow>
+#include <playerwindow.h>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class StartWindow; }
@@ -15,9 +16,12 @@ public:
     StartWindow(QWidget *parent = nullptr);
     ~StartWindow();
 
+private slots:
+    void on_pushButton_clicked();
+
 private:
     Ui::StartWindow *ui;
-    Player1Window* player1;
-    Player2Window* player2;
+    PlayerWindow* game;
+
 };
 #endif // STARTWINDOW_H
