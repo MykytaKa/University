@@ -1,14 +1,16 @@
 #include "playerwindow.h"
 #include "ui_playerwindow.h"
 #include <QMessageBox>
+#include <QDebug>
 
 PlayerWindow::PlayerWindow(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PlayerWindow)
 {
     ui->setupUi(this);
-    //Приховуємо кнопку пострілу, адже вона буде потрібна тільки після успішного розташування кораблей
     ui->ShootButton->hide();
+    ui->makeTurnButton->hide();
+    ui->gameOverLabel->hide();
 }
 
 PlayerWindow::~PlayerWindow()
@@ -16,136 +18,219 @@ PlayerWindow::~PlayerWindow()
     delete ui;
 }
 //Позначаємо клітинку, на яку користувач натиснув
-void PlayerWindow::changeValue(Cell* cell)
+void PlayerWindow::placeShip(Cell* cell)
 {
     if(!cell->getIsSet())
     {
         if(cell->text() == "")
-            cell->setText("X");
+            cell->setText("S");
         else
             cell->setText("");
     }
 }
+
 //Перевіряємо на розташування зайвих виділених клітинок
-bool PlayerWindow::checkAllCells()
+bool PlayerWindow::checkAllCells(Cell*** board, Ship* playerShips)
 {
     int n = 0;
     for(int i = 0; i < BOARDSIZE; i++)
         for(int j = 0; j < BOARDSIZE; j++)
-            if(MyButtons[i][j]->text() == "X" && !MyButtons[i][j]->getIsSet())
+            if(board[i][j]->text() == "S" && !board[i][j]->getIsSet())
                 n++;
-    if(n != Ships[index].getSize())
+    if(n != playerShips[index].getSize())
         return true;
     else
         return false;
 }
 //Перевіряємо чи корабель встановлений праворуч
-bool PlayerWindow::checkShipRight(int k, int l)
+bool PlayerWindow::checkShipRight(int k, int l, Cell*** board, Ship* playerShips)
 {
     int n = 0;
-    for(int j = l; j < BOARDSIZE && n < Ships[index].getSize() + 1; j++)
+    for(int j = l, counter = 0; j < BOARDSIZE && counter < playerShips[index].getSize(); j++, counter++)
     {
-        if(MyButtons[k][j]->getIsSet())
+        if(board[k][j]->getIsSet())
             return false;
-        if(MyButtons[k][j]->text() == "X")
+        if(board[k][j]->text() == "S")
             n++;
     }
-    if(n != Ships[index].getSize())
+    if(n != playerShips[index].getSize())
         return false;
     else
     {
         //Встановлюємо координати та напрямок корабля
-        Ships[index].setXYDirection(k, l, "right");
+        playerShips[index].setXYDirection(l, k, "right");
         return true;
     }
 }
 //Перевіряємо чи корабель встановлений вниз
-bool PlayerWindow::checkShipDown(int k, int l)
+bool PlayerWindow::checkShipDown(int k, int l, Cell*** board, Ship* playerShips)
 {
     int n = 0;
-    for(int i = k; i < BOARDSIZE && n < Ships[index].getSize() + 1; i++)
+    for(int i = k, counter = 0; i < BOARDSIZE && counter < playerShips[index].getSize(); i++, counter++)
     {
-        if(MyButtons[i][l]->getIsSet())
+        if(board[i][l]->getIsSet())
             return false;
-        if(MyButtons[i][l]->text() == "X")
+        if(board[i][l]->text() == "S")
             n++;
     }
-    if(n != Ships[index].getSize())
+    if(n != playerShips[index].getSize())
         return false;
     else
     {
         //Встановлюємо координати та напрямок корабля
-        Ships[index].setXYDirection(k, l, "down");
+        playerShips[index].setXYDirection(l, k, "down");
         return true;
     }
 }
 
-bool PlayerWindow::func()
+bool PlayerWindow::isValidShipPosition(Cell*** board, Ship* ships)
 {
     for(int i = 0; i < BOARDSIZE; i++)
     {
         for(int j = 0; j < BOARDSIZE; j++)
         {
             //Перевіряємо на правильність виділені користувачем клітинки
-            if(MyButtons[i][j]->text() == "X" && !MyButtons[i][j]->getIsSet())
+            if(board[i][j]->text() == "S" && !board[i][j]->getIsSet())
             {
-                return checkShipDown(i, j) || checkShipRight(i, j);
+                return checkShipDown(i, j, board, ships) || checkShipRight(i, j, board, ships);
             }
         }
     }
     return false;
 }
 
+void PlayerWindow::showBoard(Cell***& boardDefend, Cell***& boardAttack)
+{
+    for(int i = 0; i < BOARDSIZE; i++)
+        for(int j = 0; j < BOARDSIZE; j++)
+        {
+            boardDefend[i][j]->show();
+            boardAttack[i][j]->show();
+        }
+}
+
+void PlayerWindow::hideBoard(Cell*** boardDefend, Cell*** boardAttack)
+{
+    for(int i = 0; i < BOARDSIZE; i++)
+        for(int j = 0; j < BOARDSIZE; j++)
+        {
+            boardDefend[i][j]->hide();
+            boardAttack[i][j]->hide();
+        }
+}
+
 //Розташовуємо корабель по натиску на кнопку "Place ship"
 void PlayerWindow::on_placeShipButton_clicked()
 {
+    int leftCells;
     if(index < 10)
     {
         bool error;
-        error = func();
+        error = isValidShipPosition(boardDefend, ships);
         //Виводимо помилку при неправильному розташуванні
         if(!error)
             QMessageBox::critical(this, "ERROR", "INVALID SETTED SHIP");
-        else if(checkAllCells())
+        else if(checkAllCells(boardDefend, ships))
             QMessageBox::critical(this, "ERROR", "INVALID SETTED SHIP");
         else
         {
-            setShip(Ships[index]);
+            setShip(ships[index], boardDefend);
             index++;
-            int leftCells = Ships[index].getSize();
+            if(index == 10)
+            {
+                setBoardCells(boardDefend);
+                ui->makeTurnButton->show();
+                number++;
+            }
+            if(index != 10)
+                leftCells = ships[index].getSize();
             QString temp = QString::number(leftCells);
             ui->shipsLeft->setText(temp);
         }
     }
-    else
+}
+
+void PlayerWindow::on_makeTurnButton_clicked()
+{
+    if(number == 1)
     {
+        index = 0;
+        boardAttack = Player2BoardAttack;
+        boardDefend = Player2BoardDefend;
+        ships = ShipsPlayer2;
+        hideBoard(Player1BoardDefend, Player1BoardAttack);
+        showBoard(Player2BoardDefend, Player2BoardAttack);
+        int leftCells = ships[index].getSize();
+        QString temp = QString::number(leftCells);
+        ui->shipsLeft->setText(temp);
+        ui->makeTurnButton->hide();
+        ui->playerBoardLabel->setText("Player 2");
+    }
+    if(number == 2)
+    {
+        hideBoard(Player2BoardDefend, Player2BoardAttack);
+        showBoard(Player1BoardDefend, Player1BoardAttack);
         ui->placeShipButton->hide();
         ui->placeShipLabel->hide();
         ui->shipsLeft->hide();
+        ui->makeTurnButton->hide();
+        ui->placeShipButton->setEnabled(false);
+        ui->placeShipLabel->setEnabled(false);
+        ui->shipsLeft->setEnabled(false);
         ui->ShootButton->show();
+        ui->playerBoardLabel->setText("Player 1");
     }
 }
 
-//Позначаємо клітинку, в яких тепер стоїть корабель
-void PlayerWindow::setShip(Ship ship)
+//Забороняємо гравцю взяємодіяти з усіма клітинками
+void PlayerWindow::setBoardCells(Cell*** board)
 {
-    int magnifier = ship.getDirection() == RIGHT || ship.getDirection() == DOWN ? magnifier = 1 : magnifier = -1;
-        if (ship.getDirection() == LEFT || ship.getDirection() == RIGHT)
+    for(int i = 0; i < BOARDSIZE; i++)
+        for(int j = 0; j < BOARDSIZE; j++)
         {
-            for (int i = ship.getY() - 1, j = ship.getX() - 1, steps = 0; steps < ship.getSize(); j += magnifier)
+            board[i][j]->setCursor(Qt::ArrowCursor);
+            board[i][j]->set();
+        }
+}
+
+//Позначаємо клітинку, в яких тепер стоїть корабель
+void PlayerWindow::setShip(Ship ship, Cell*** board)
+{
+    int ship_s = ship.getSize();
+    if (ship.getSize() == 1)
+    {
+        for (int j = ship.getX() == LOWERLIM ? ship.getX() : ship.getX() - 1; j < BOARDSIZE && j < ship.getX() + 2; j++)
+            for (int i = ship.getY() == LOWERLIM ? ship.getY() : ship.getY() - 1, stepsI = 0; i < BOARDSIZE && stepsI < ship_s + 2; i++, stepsI++)
             {
-                MyButtons[i][j]->set();
-                steps++;
+                board[i][j]->setCursor(Qt::ForbiddenCursor);
+                board[i][j]->set();
             }
+    }
+    else
+    {
+        if (ship.getDirection() == RIGHT)
+        {
+            if (ship.getX() == LOWERLIM)
+                ship_s--;
+            for (int i = ship.getY() == LOWERLIM ? ship.getY() : ship.getY() - 1; i < BOARDSIZE && i < ship.getY() + 2; i++)
+                for (int j = ship.getX() == LOWERLIM ? ship.getX() : ship.getX() - 1, stepsJ = 0; j < BOARDSIZE && stepsJ < ship_s + 2; j++, stepsJ++)
+                {
+                    board[i][j]->setCursor(Qt::ForbiddenCursor);
+                    board[i][j]->set();
+                }
         }
         else
         {
-            for (int i = ship.getY() - 1, j = ship.getX() - 1, steps = 0; steps < ship.getSize(); i += magnifier)
-            {
-                MyButtons[i][j]->set();
-                steps++;
-            }
+            if (ship.getY() == LOWERLIM)
+                ship_s--;
+            for (int j = ship.getX() == LOWERLIM ? ship.getX() : ship.getX() - 1; j < BOARDSIZE && j < ship.getX() + 2; j++)
+                for (int i = ship.getY() == LOWERLIM ? ship.getY() : ship.getY() - 1, stepsI = 0; i < BOARDSIZE && stepsI < ship_s + 2; i++, stepsI++)
+                {
+                    board[i][j]->setCursor(Qt::ForbiddenCursor);
+                    board[i][j]->set();
+                }
         }
+    }
 }
 
 //Заповнюємо кожен корабель своїм розміром
@@ -172,77 +257,176 @@ Ship* PlayerWindow::createShips()
     return ships;
 }
 
-//Виділяємо пам'ять та заповнюємо таблиці пустими клітинками
+//Встановлюємо зв'язок, щоб при натисканні на клітинку поля вона відмічалась
+void PlayerWindow::boardConnectPlace(Cell*** board)
+{
+    for (int i = 0; i < BOARDSIZE; i++)
+    {
+       for (int j = 0; j < BOARDSIZE; j++)
+        {
+            connect(board[i][j], &Cell::clicked, [=]() {
+                placeShip(board[i][j]);
+            });
+       }
+    }
+}
+
+void PlayerWindow::boardConnectShoot(Cell*** board)
+{
+    for (int i = 0; i < BOARDSIZE; i++)
+    {
+       for (int j = 0; j < BOARDSIZE; j++)
+        {
+            connect(board[i][j], &Cell::clicked, [=]() {
+                Attack(board[i][j]);
+            });
+       }
+    }
+}
+
+Cell*** PlayerWindow::createPlayerBoard()
+{
+    Cell*** board = new Cell**[BOARDSIZE];
+    for (int i = 0; i < BOARDSIZE; i++)
+    {
+       board[i] = new Cell*[BOARDSIZE];
+       for (int j = 0; j < BOARDSIZE; j++)
+        {
+           board[i][j] = new Cell();
+           board[i][j]->setCursor(Qt::CrossCursor);
+       }
+    }
+    return board;
+}
+
+Cell*** PlayerWindow::getPlayer1BoardDefend()
+{
+    return Player1BoardDefend;
+}
+
+Cell*** PlayerWindow::getPlayer1BoardAttack()
+{
+    return Player1BoardAttack;
+}
+
+Cell*** PlayerWindow::getPlayer2BoardDefend()
+{
+    return Player2BoardDefend;
+}
+
+Cell*** PlayerWindow::getPlayer2BoardAttack()
+{
+    return Player2BoardAttack;
+}
+
+//Заповнюємо таблиці пустими клітинками
 void PlayerWindow::fillBoard()
 {
     for (int i = 0; i < BOARDSIZE; i++)
     {
-       MyButtons[i] = new Cell*[BOARDSIZE];
-       EnemyButtons[i] = new Cell*[BOARDSIZE];
        for (int j = 0; j < BOARDSIZE; j++)
         {
-            MyButtons[i][j] = new Cell();
-            MyButtons[i][j]->setCursor(Qt::CrossCursor);
-            EnemyButtons[i][j] = new Cell();
-            EnemyButtons[i][j]->setCursor(Qt::CrossCursor);
-            //Робимо взаємодію між клітинками та користувачем
-            connect(MyButtons[i][j], &Cell::clicked, [=]() {
-                changeValue(MyButtons[i][j]);
-            });
-            //Робимо взаємодію між клітинками та користувачем
-            connect(EnemyButtons[i][j], &Cell::clicked, [=]() {
-                changeValue(EnemyButtons[i][j]);
-            });
-            if(i == 0)
-            {
-                ui->column1Me->addWidget(MyButtons[i][j]);
-                ui->column1Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 1)
-            {
-                ui->column2Me->addWidget(MyButtons[i][j]);
-                ui->column2Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 2)
-            {
-                ui->column3Me->addWidget(MyButtons[i][j]);
-                ui->column3Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 3)
-            {
-                ui->column4Me->addWidget(MyButtons[i][j]);
-                ui->column4Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 4)
-            {
-                ui->column5Me->addWidget(MyButtons[i][j]);
-                ui->column5Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 5)
-            {
-                ui->column6Me->addWidget(MyButtons[i][j]);
-                ui->column6Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 6)
-            {
-                ui->column7Me->addWidget(MyButtons[i][j]);
-                ui->column7Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 7)
-            {
-                ui->column8Me->addWidget(MyButtons[i][j]);
-                ui->column8Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 8)
-            {
-                ui->column9Me->addWidget(MyButtons[i][j]);
-                ui->column9Enemy->addWidget(EnemyButtons[i][j]);
-            }
-            if(i == 9)
-            {
-                ui->column_10Me->addWidget(MyButtons[i][j]);
-                ui->column_10Enemy->addWidget(EnemyButtons[i][j]);
-            }
+           ui->MyBoard->addWidget(Player1BoardDefend[i][j], i, j);
+           ui->EnemyBoard->addWidget(Player1BoardAttack[i][j], i, j);
+           ui->MyBoard->addWidget(Player2BoardDefend[i][j], i, j);
+           ui->EnemyBoard->addWidget(Player2BoardAttack[i][j], i, j);
+           Player2BoardDefend[i][j]->hide();
+           Player2BoardAttack[i][j]->hide();
         }
     }
 }
+
+void PlayerWindow::transfereBoard()
+{
+    for(int i = 0; i < BOARDSIZE; i++)
+        for(int j = 0; j < BOARDSIZE; j++)
+            ui->EnemyBoard->addWidget(Player2BoardDefend[i][j]);
+}
+
+bool PlayerWindow::isPlayerLose(Cell*** board)
+{
+    for(int i = 0; i < BOARDSIZE; i++)
+        for(int j = 0; j < BOARDSIZE; j++)
+            if(board[i][j]->text() == "S")
+                return false;
+    return true;
+}
+
+void PlayerWindow::shoot(int i, int j)
+{
+    if(boardDefend[i][j]->text() == "S")
+    {
+        boardDefend[i][j]->setText("X");
+        boardAttack[i][j]->setText("X");
+        if(isPlayerLose(Player1BoardDefend) ||  isPlayerLose(Player2BoardDefend))
+        {
+            transfereBoard();
+            ui->ShootButton->hide();
+            ui->gameOverLabel->show();
+            ui->playerBoardLabel->hide();
+            hideBoard(Player2BoardAttack, Player2BoardAttack);
+            showBoard(Player2BoardDefend, Player2BoardDefend);
+            hideBoard(Player1BoardAttack, Player1BoardAttack);
+            showBoard(Player1BoardDefend, Player1BoardDefend);
+            ui->YourBoardLabel->setText("Player 1");
+            ui->EnemyBoardLabel->setText("Player 2");
+        }
+    }
+    else
+    {
+        QMessageBox::warning(this, "SHOT", "YOU MISS`");
+        boardDefend[i][j]->setText("-");
+        boardAttack[i][j]->setText("-");
+        if(number % 2 == 0)
+        {
+            hideBoard(Player1BoardDefend, Player1BoardAttack);
+            showBoard(Player2BoardDefend, Player2BoardAttack);
+            ui->playerBoardLabel->setText("Player 2");
+        }
+        else
+        {
+            hideBoard(Player2BoardDefend, Player2BoardAttack);
+            showBoard(Player1BoardDefend, Player1BoardAttack);
+            ui->playerBoardLabel->setText("Player 1");
+        }
+        number++;
+    }
+}
+
+void PlayerWindow::Attack(Cell *cell)
+{
+    if(cell->text() == "" && accessCells)
+    {
+        cell->setText("O");
+        accessCells = false;
+    }
+    else if(cell->text() == "O" && !accessCells)
+    {
+        cell->setText("");
+        accessCells = true;
+    }
+}
+
+void PlayerWindow::on_ShootButton_clicked()
+{
+    accessCells = true;
+    if(number % 2 == 0)
+    {
+        boardAttack = Player1BoardAttack;
+        boardDefend = Player2BoardDefend;
+    }
+    else
+    {
+        boardAttack = Player2BoardAttack;
+        boardDefend = Player1BoardDefend;
+    }
+    for(int i = 0; i < BOARDSIZE; i++)
+        for(int j = 0; j < BOARDSIZE; j++)
+        {
+            if(boardAttack[i][j]->text() == "O")
+            {
+                shoot(i, j);
+            }
+        }
+}
+

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>742</width>
-    <height>448</height>
+    <height>464</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -19,7 +19,7 @@
   <property name="maximumSize">
    <size>
     <width>850</width>
-    <height>448</height>
+    <height>488</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -67,10 +67,10 @@
   <widget class="QPushButton" name="ShootButton">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>330</y>
+     <x>500</x>
+     <y>320</y>
      <width>121</width>
-     <height>81</height>
+     <height>61</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -100,105 +100,39 @@
      <height>251</height>
     </rect>
    </property>
-   <layout class="QGridLayout" name="MyBoard" rowstretch="0,0">
-    <property name="horizontalSpacing">
-     <number>2</number>
+   <layout class="QGridLayout" name="MyBoard" rowstretch="0">
+    <property name="spacing">
+     <number>0</number>
     </property>
-    <property name="verticalSpacing">
-     <number>7</number>
-    </property>
-    <item row="1" column="4">
-     <layout class="QVBoxLayout" name="column5Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="2">
-     <layout class="QVBoxLayout" name="column3Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="8">
-     <layout class="QVBoxLayout" name="column9Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="6">
-     <layout class="QVBoxLayout" name="column7Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="3">
-     <layout class="QVBoxLayout" name="column4Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="0">
-     <layout class="QVBoxLayout" name="column1Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="7">
-     <layout class="QVBoxLayout" name="column8Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="1">
-     <layout class="QVBoxLayout" name="column2Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="5">
-     <layout class="QVBoxLayout" name="column6Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="1" column="9">
-     <layout class="QVBoxLayout" name="column_10Me">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
    </layout>
   </widget>
   <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
-     <x>90</x>
-     <y>330</y>
-     <width>541</width>
-     <height>81</height>
+     <x>20</x>
+     <y>320</y>
+     <width>427</width>
+     <height>61</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
      <widget class="QLabel" name="placeShipLabel">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="font">
        <font>
         <family>Terminal</family>
         <pointsize>7</pointsize>
+        <italic>false</italic>
        </font>
       </property>
       <property name="text">
-       <string>Number of unplaced ship cells left:</string>
+       <string>The size of the setting ship:</string>
       </property>
      </widget>
     </item>
@@ -280,80 +214,70 @@
     </rect>
    </property>
    <layout class="QGridLayout" name="EnemyBoard">
-    <property name="horizontalSpacing">
-     <number>2</number>
+    <property name="spacing">
+     <number>0</number>
     </property>
-    <item row="0" column="1">
-     <layout class="QVBoxLayout" name="column2Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="0">
-     <layout class="QVBoxLayout" name="column1Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="2">
-     <layout class="QVBoxLayout" name="column3Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="4">
-     <layout class="QVBoxLayout" name="column5Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="5">
-     <layout class="QVBoxLayout" name="column6Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="8">
-     <layout class="QVBoxLayout" name="column9Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="7">
-     <layout class="QVBoxLayout" name="column8Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="6">
-     <layout class="QVBoxLayout" name="column7Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="9">
-     <layout class="QVBoxLayout" name="column_10Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
-    <item row="0" column="3">
-     <layout class="QVBoxLayout" name="column4Enemy">
-      <property name="spacing">
-       <number>2</number>
-      </property>
-     </layout>
-    </item>
    </layout>
+  </widget>
+  <widget class="QPushButton" name="makeTurnButton">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>400</y>
+     <width>271</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Terminal</family>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Finish the placing ships</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="playerBoardLabel">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>10</y>
+     <width>81</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Terminal</family>
+     <pointsize>7</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Player 1</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="gameOverLabel">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>320</y>
+     <width>131</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Terminal</family>
+     <pointsize>15</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>GAME OVER </string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
   </widget>
  </widget>
  <resources/>
