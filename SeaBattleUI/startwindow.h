@@ -18,6 +18,7 @@ public:
 private:
     Ui::StartWindow *ui;
     Player1Window* player1;
+    QPushButton*** xx = new QPushButton**[10];
     Player2Window* player2;
 };
 #endif // STARTWINDOW_H
