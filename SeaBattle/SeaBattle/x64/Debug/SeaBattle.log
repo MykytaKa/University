@@ -1,2 +1,9 @@
 ﻿  SeaBattle.cpp
+  Game.cpp
+  Boards.cpp
+  ValueChecker.cpp
+  ResourceHandler.cpp
+  Ship.cpp
+  Generating Code...
+  LINK : D:\C++\University\SeaBattle\x64\Debug\SeaBattle.exe not found or not built by the last incremental link; performing full link
   SeaBattle.vcxproj -> D:\C++\University\SeaBattle\x64\Debug\SeaBattle.exe

@@ -140,6 +140,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="SeaBattle.cpp" />
+    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Boards.cpp" />
+    <ClCompile Include="ValueChecker.cpp" />
+    <ClCompile Include="ResourceHandler.cpp" />
+    <ClCompile Include="Ship.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game.h" />
+    <ClInclude Include="Boards.h" />
+    <ClInclude Include="Consts.h" />
+    <ClInclude Include="ValueChecker.h" />
+    <ClInclude Include="Ship.h" />
+    <ClInclude Include="ResourceHandler.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
