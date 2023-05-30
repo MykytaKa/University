@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>742</width>
+    <width>724</width>
     <height>464</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>742</width>
+    <width>724</width>
     <height>448</height>
    </size>
   </property>
@@ -29,7 +29,7 @@
    <property name="geometry">
     <rect>
      <x>140</x>
-     <y>20</y>
+     <y>30</y>
      <width>100</width>
      <height>20</height>
     </rect>
@@ -47,7 +47,7 @@
    <property name="geometry">
     <rect>
      <x>480</x>
-     <y>20</y>
+     <y>30</y>
      <width>130</width>
      <height>20</height>
     </rect>
@@ -95,9 +95,9 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>50</y>
-     <width>341</width>
-     <height>251</height>
+     <y>60</y>
+     <width>321</width>
+     <height>241</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="MyBoard" rowstretch="0">
@@ -208,9 +208,9 @@
    <property name="geometry">
     <rect>
      <x>380</x>
-     <y>50</y>
-     <width>341</width>
-     <height>251</height>
+     <y>60</y>
+     <width>321</width>
+     <height>241</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="EnemyBoard">

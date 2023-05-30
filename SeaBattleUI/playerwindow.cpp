@@ -2,6 +2,7 @@
 #include "ui_playerwindow.h"
 #include <QMessageBox>
 #include <QDebug>
+#include <QIcon>
 
 PlayerWindow::PlayerWindow(QWidget *parent) :
     QDialog(parent),
@@ -294,6 +295,16 @@ Cell*** PlayerWindow::createPlayerBoard()
         {
            board[i][j] = new Cell();
            board[i][j]->setCursor(Qt::CrossCursor);
+           //board[i][j]->setStyleSheet("Cell { background-image: url(Icons/waves.png); }");
+           QPixmap pixmap("Icons/waves.png");
+
+           // Resize the pixmap to button's size
+           QSize buttonSize = board[i][j]->size();
+           QPixmap scaledPixmap = pixmap.scaled(buttonSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+
+           // Set the scaled pixmap as the button's icon
+           board[i][j]->setIcon(QIcon(scaledPixmap.toImage()));
+           board[i][j]->setIconSize(buttonSize);
        }
     }
     return board;
